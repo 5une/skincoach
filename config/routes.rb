@@ -1,7 +1,11 @@
 require 'sidekiq/web'
 
 Rails.application.routes.draw do
-  get "consultations/new"
+  resources :consultations, only: [:new, :create, :show] do
+    member do
+      get :status
+    end
+  end
   get "consultations/status_demo"
   # Mount Sidekiq Web UI
   mount Sidekiq::Web => '/sidekiq'

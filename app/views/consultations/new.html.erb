@@ -13,26 +13,20 @@
 
       <!-- Upload Form -->
       <div class="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
-        <form data-controller="uploader" class="space-y-6">
+        <%= form_with model: @consultation, local: true, multipart: true, data: { controller: "uploader" }, class: "space-y-6" do |form| %>
           <!-- File Input -->
           <div class="space-y-4">
-            <label for="photo" class="block text-sm font-medium text-gray-700">
-              Upload Your Photo
-            </label>
-            <input 
-              type="file" 
-              id="photo" 
-              name="photo"
-              accept="image/*"
-              data-uploader-target="input"
-              class="block w-full text-sm text-gray-500
-                     file:mr-4 file:py-2 file:px-4
-                     file:rounded-full file:border-0
-                     file:text-sm file:font-semibold
-                     file:bg-indigo-50 file:text-indigo-700
-                     hover:file:bg-indigo-100
-                     cursor-pointer"
-            />
+            <%= form.label :photo, "Upload Your Photo", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.file_field :photo, 
+                accept: "image/*",
+                data: { uploader_target: "input" },
+                class: "block w-full text-sm text-gray-500
+                       file:mr-4 file:py-2 file:px-4
+                       file:rounded-full file:border-0
+                       file:text-sm file:font-semibold
+                       file:bg-indigo-50 file:text-indigo-700
+                       hover:file:bg-indigo-100
+                       cursor-pointer" %>
           </div>
 
           <!-- Image Preview -->
@@ -46,20 +40,16 @@
 
           <!-- Submit Button -->
           <div class="flex justify-center mt-8">
-            <button 
-              type="submit"
-              data-uploader-target="submit"
-              disabled
-              class="disabled:bg-gray-300 disabled:cursor-not-allowed
-                     bg-indigo-600 hover:bg-indigo-700 
-                     text-white font-bold py-3 px-8 rounded-lg
-                     transition duration-200 ease-in-out
-                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              Analyze My Skin
-            </button>
+            <%= form.submit "Analyze My Skin",
+                data: { uploader_target: "submit" },
+                disabled: true,
+                class: "disabled:bg-gray-300 disabled:cursor-not-allowed
+                       bg-indigo-600 hover:bg-indigo-700 
+                       text-white font-bold py-3 px-8 rounded-lg
+                       transition duration-200 ease-in-out
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
           </div>
-        </form>
+        <% end %>
 
         <!-- Disclaimer -->
         <div class="mt-8 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">

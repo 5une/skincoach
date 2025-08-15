@@ -1,0 +1,104 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  <div class="w-full px-4 py-8">
+    <div class="w-full">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+          Analyzing Your Photo
+        </h1>
+        <p class="text-lg text-gray-600">
+          Please wait while our AI analyzes your skin
+        </p>
+      </div>
+
+      <!-- Status Display -->
+      <div class="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
+        <div 
+          data-controller="status" 
+          data-status-url-value="<%= status_consultation_path(@consultation, format: :json) %>"
+          data-status-interval-value="2000"
+          class="space-y-6"
+        >
+          <!-- Uploaded Image Thumbnail -->
+          <div class="text-center">
+            <h3 class="text-lg font-semibold mb-4">Your Photo</h3>
+            <% if @consultation.photo.attached? %>
+              <%= image_tag @consultation.photo, 
+                  class: "mx-auto max-w-xs h-48 object-cover rounded-lg shadow-md",
+                  alt: "Your uploaded photo" %>
+            <% end %>
+          </div>
+
+          <!-- Status Indicator -->
+          <div class="text-center">
+            <div class="text-2xl font-semibold mb-4">
+              Current Status: <span data-status-target="indicator" class="text-indigo-600">
+                <%= case @consultation.status
+                    when 'pending' then '⏳ Pending...'
+                    when 'analyzing' then '🔍 Analyzing your photo...'
+                    when 'completed' then '✅ Analysis complete!'
+                    when 'failed' then '❌ Analysis failed'
+                    else @consultation.status
+                    end %>
+              </span>
+            </div>
+          </div>
+
+          <!-- Content Area for Results -->
+          <div data-status-target="content" class="bg-gray-50 rounded-lg p-6 min-h-32">
+            <% if @consultation.completed? %>
+              <%= render 'results', consultation: @consultation %>
+            <% elsif @consultation.failed? %>
+              <div class="text-center text-red-600">
+                <h3 class="text-lg font-semibold mb-2">Analysis Failed</h3>
+                <p><%= @consultation.error_message %></p>
+                <div class="mt-4">
+                  <%= link_to "Try Again", new_consultation_path, 
+                      class: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded" %>
+                </div>
+              </div>
+            <% else %>
+              <div class="text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p class="text-gray-600">
+                  Our AI is carefully analyzing your photo. This usually takes 30-60 seconds...
+                </p>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Navigation -->
+          <div class="text-center">
+            <%= link_to "Upload New Photo", new_consultation_path, 
+                class: "bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-4" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Information Cards -->
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div class="text-center">
+          <div class="bg-white rounded-lg p-6 shadow-md">
+            <div class="text-3xl mb-3">🤖</div>
+            <h3 class="font-semibold text-gray-900 mb-2">AI-Powered</h3>
+            <p class="text-sm text-gray-600">Advanced computer vision analyzes your unique skin characteristics</p>
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="bg-white rounded-lg p-6 shadow-md">
+            <div class="text-3xl mb-3">⚡</div>
+            <h3 class="font-semibold text-gray-900 mb-2">Fast Results</h3>
+            <p class="text-sm text-gray-600">Get personalized recommendations in under a minute</p>
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="bg-white rounded-lg p-6 shadow-md">
+            <div class="text-3xl mb-3">🎯</div>
+            <h3 class="font-semibold text-gray-900 mb-2">Personalized</h3>
+            <p class="text-sm text-gray-600">Custom product picks based on your specific skin needs</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
