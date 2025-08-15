@@ -9,8 +9,14 @@ class ConsultationsController < ApplicationController
     @consultation = Consultation.new(consultation_params)
 
     if @consultation.save
-      # Enqueue background job for analysis (demo version)
-      AnalyzeImageDemoJob.perform_later(@consultation)
+      # Enqueue background job for analysis
+      if Rails.env.development? && ENV['USE_DEMO_ANALYSIS'] == 'true'
+        # Use demo job in development if explicitly enabled
+        AnalyzeImageDemoJob.perform_later(@consultation)
+      else
+        # Use real vision API analysis
+        AnalyzeImageJob.perform_later(@consultation)
+      end
       redirect_to consultation_path(@consultation)
     else
       render :new, status: :unprocessable_entity

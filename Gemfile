@@ -32,6 +32,9 @@ gem "solid_cable"
 # Use Sidekiq for background job processing
 gem "sidekiq"
 
+# HTTP client for API calls
+gem "httparty"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
