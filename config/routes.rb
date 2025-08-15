@@ -1,6 +1,8 @@
 require 'sidekiq/web'
 
 Rails.application.routes.draw do
+  get "consultations/new"
+  get "consultations/status_demo"
   # Mount Sidekiq Web UI
   mount Sidekiq::Web => '/sidekiq'
 
@@ -15,5 +17,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "consultations#new"
 end

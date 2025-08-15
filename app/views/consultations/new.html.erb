@@ -1,0 +1,107 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+          AI Skin Analysis
+        </h1>
+        <p class="text-lg text-gray-600">
+          Upload a clear photo of your face for personalized skincare recommendations
+        </p>
+      </div>
+
+      <!-- Upload Form -->
+      <div class="bg-white rounded-lg shadow-lg p-8">
+        <form data-controller="uploader" class="space-y-6">
+          <!-- File Input -->
+          <div class="space-y-4">
+            <label for="photo" class="block text-sm font-medium text-gray-700">
+              Upload Your Photo
+            </label>
+            <input 
+              type="file" 
+              id="photo" 
+              name="photo"
+              accept="image/*"
+              data-uploader-target="input"
+              class="block w-full text-sm text-gray-500
+                     file:mr-4 file:py-2 file:px-4
+                     file:rounded-full file:border-0
+                     file:text-sm file:font-semibold
+                     file:bg-indigo-50 file:text-indigo-700
+                     hover:file:bg-indigo-100
+                     cursor-pointer"
+            />
+          </div>
+
+          <!-- Image Preview -->
+          <div class="mt-6">
+            <img 
+              data-uploader-target="preview"
+              class="hidden mx-auto max-w-full h-64 object-cover rounded-lg shadow-md"
+              alt="Preview of uploaded photo"
+            />
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex justify-center mt-8">
+            <button 
+              type="submit"
+              data-uploader-target="submit"
+              disabled
+              class="disabled:bg-gray-300 disabled:cursor-not-allowed
+                     bg-indigo-600 hover:bg-indigo-700 
+                     text-white font-bold py-3 px-8 rounded-lg
+                     transition duration-200 ease-in-out
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Analyze My Skin
+            </button>
+          </div>
+        </form>
+
+        <!-- Disclaimer -->
+        <div class="mt-8 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-yellow-700">
+                <strong>Important:</strong> This is not medical advice. For persistent or severe skin issues, consult a dermatologist.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center">
+          <div class="bg-white rounded-lg p-6 shadow-md">
+            <div class="text-3xl mb-3">🔍</div>
+            <h3 class="font-semibold text-gray-900 mb-2">AI Analysis</h3>
+            <p class="text-sm text-gray-600">Advanced computer vision analyzes your skin concerns</p>
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="bg-white rounded-lg p-6 shadow-md">
+            <div class="text-3xl mb-3">💧</div>
+            <h3 class="font-semibold text-gray-900 mb-2">Personalized</h3>
+            <p class="text-sm text-gray-600">Custom product recommendations for your skin type</p>
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="bg-white rounded-lg p-6 shadow-md">
+            <div class="text-3xl mb-3">🛡️</div>
+            <h3 class="font-semibold text-gray-900 mb-2">Safe & Private</h3>
+            <p class="text-sm text-gray-600">Your photos are processed securely and not stored</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

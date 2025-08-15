@@ -1,0 +1,66 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+          Stimulus Status Controller Demo
+        </h1>
+        <p class="text-lg text-gray-600">
+          Testing the status polling functionality
+        </p>
+      </div>
+
+      <!-- Status Display -->
+      <div class="bg-white rounded-lg shadow-lg p-8">
+        <div 
+          data-controller="status" 
+          data-status-url-value="/consultations/status_demo.json"
+          data-status-interval-value="3000"
+          class="space-y-6"
+        >
+          <!-- Status Indicator -->
+          <div class="text-center">
+            <div class="text-2xl font-semibold mb-4">
+              Current Status: <span data-status-target="indicator" class="text-indigo-600">⏳ Pending...</span>
+            </div>
+          </div>
+
+          <!-- Content Area -->
+          <div data-status-target="content" class="bg-gray-50 rounded-lg p-6 min-h-32">
+            <p class="text-gray-600 text-center">
+              Status polling will update this area when complete...
+            </p>
+          </div>
+
+          <!-- Manual Controls -->
+          <div class="text-center space-x-4">
+            <button 
+              onclick="window.location.reload()"
+              class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Refresh Page
+            </button>
+            <a 
+              href="/"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded inline-block"
+            >
+              Back to Upload
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Debug Info -->
+      <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">Debug Information</h3>
+        <div class="space-y-2 text-sm text-gray-600">
+          <p><strong>Polling URL:</strong> /consultations/status_demo.json</p>
+          <p><strong>Polling Interval:</strong> 3 seconds</p>
+          <p><strong>Expected Response:</strong> JSON with status field</p>
+          <p><strong>Status Values:</strong> pending → analyzing → completed/failed</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
