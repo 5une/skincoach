@@ -52,7 +52,8 @@ class ConsultationsController < ApplicationController
 
     render_to_string(
       partial: 'consultations/results',
-      locals: { consultation: @consultation }
+      locals: { consultation: @consultation },
+      formats: [:html]
     )
   end
 end
