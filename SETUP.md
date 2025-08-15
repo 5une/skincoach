@@ -34,18 +34,20 @@ This Rails 8 application provides AI-powered skin analysis and personalized skin
 
 2. **Configure Vision API:**
    
-   **Option A: Environment Variables**
    ```bash
-   export VISION_PROVIDER=azure  # or 'google'
-   export VISION_API_KEY=your_api_key_here
-   export VISION_API_ENDPOINT=your_endpoint_here
-   export REDIS_URL=redis://localhost:6379/0
+   # Copy the example environment file
+   cp env.example .env
+   
+   # Edit .env with your actual credentials
+   nano .env
    ```
-
-   **Option B: Configuration File**
+   
+   Set your Vision API credentials in `.env`:
    ```bash
-   cp config/vision_api.yml.example config/vision_api.yml
-   # Edit config/vision_api.yml with your credentials
+   VISION_PROVIDER=azure
+   VISION_API_KEY=your_actual_api_key
+   VISION_API_ENDPOINT=your_actual_endpoint
+   REDIS_URL=redis://localhost:6379/0
    ```
 
 3. **Start services:**
@@ -64,7 +66,7 @@ This Rails 8 application provides AI-powered skin analysis and personalized skin
 1. Create Azure OpenAI resource in EU region (for data residency)
 2. Deploy GPT-4o model
 3. Get API key and endpoint from Azure portal
-4. Configure:
+4. Configure in your `.env` file:
    ```bash
    VISION_PROVIDER=azure
    VISION_API_KEY=your_azure_api_key
@@ -76,7 +78,7 @@ This Rails 8 application provides AI-powered skin analysis and personalized skin
 1. Create Google Cloud project with Vertex AI enabled
 2. Set up service account with Vertex AI permissions
 3. Get authentication token
-4. Configure:
+4. Configure in your `.env` file:
    ```bash
    VISION_PROVIDER=google
    VISION_API_KEY=your_google_token
@@ -85,10 +87,14 @@ This Rails 8 application provides AI-powered skin analysis and personalized skin
 
 ## Development Mode
 
-For development without API credentials, use the demo analysis:
+For development without API credentials, set this in your `.env` file:
 
 ```bash
-export USE_DEMO_ANALYSIS=true
+USE_DEMO_ANALYSIS=true
+```
+
+Then start the app:
+```bash
 bin/dev
 ```
 
