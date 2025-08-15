@@ -1,38 +1,22 @@
 class VisionAnalysisClient
-  include HTTParty
-
   class AnalysisError < StandardError; end
-
+  
   def initialize
-    @api_key = ENV['VISION_API_KEY']
-    @api_endpoint = ENV['VISION_API_ENDPOINT'] 
-    @provider = ENV['VISION_PROVIDER'] || 'azure' # 'azure' or 'google'
+    @api_key = ENV['OPENAI_API_KEY']
+    raise AnalysisError, "OpenAI API key missing" if @api_key.blank?
     
-    raise AnalysisError, "Vision API configuration missing" if @api_key.blank? || @api_endpoint.blank?
-    
-    # Validate EU region for data residency (as per CURSOR.md requirement)
-    validate_eu_region if @provider == 'azure'
+    @client = OpenAI::Client.new(access_token: @api_key)
   end
-
+  
   def analyze_image(image_file)
-    case @provider.downcase
-    when 'azure'
-      analyze_with_azure(image_file)
-    when 'google'
-      analyze_with_google(image_file)
-    else
-      raise AnalysisError, "Unsupported vision provider: #{@provider}"
-    end
-  end
-
-  private
-
-  def analyze_with_azure(image_file)
+    Rails.logger.info "Starting OpenAI vision analysis"
+    
     # Prepare image data
     image_data = encode_image(image_file)
-
-    # Construct the request
-    payload = {
+    
+    # Make API call to OpenAI
+    response = @client.chat(
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -56,58 +40,15 @@ class VisionAnalysisClient
       ],
       max_tokens: 1000,
       temperature: 0.1
-    }
-    
-    # Make the API call
-    response = HTTParty.post(
-      @api_endpoint,
-      headers: {
-        'Content-Type' => 'application/json',
-        'api-key' => @api_key
-      },
-      body: payload.to_json,
-      timeout: 60
     )
     
-    parse_azure_response(response)
+    parse_openai_response(response)
   end
   
-  def analyze_with_google(image_file)
-    # Prepare image data
-    image_data = encode_image(image_file)
-    
-    # Construct the request for Google Vertex AI
-    payload = {
-      instances: [
-        {
-          prompt: user_prompt,
-          image: {
-            bytes_base64_encoded: image_data
-          }
-        }
-      ],
-      parameters: {
-        temperature: 0.1,
-        max_output_tokens: 1000
-      }
-    }
-    
-    # Make the API call
-    response = HTTParty.post(
-      @api_endpoint,
-      headers: {
-        'Content-Type' => 'application/json',
-        'Authorization' => "Bearer #{@api_key}"
-      },
-      body: payload.to_json,
-      timeout: 60
-    )
-
-    parse_google_response(response)
-  end
-
+  private
+  
   def encode_image(image_file)
-    # Enhanced input preparation as per CURSOR.md step 2
+    # Enhanced input preparation
     Rails.logger.info "Preparing image for analysis: #{image_file.class}"
     
     begin
@@ -135,7 +76,7 @@ class VisionAnalysisClient
       raise AnalysisError, "Failed to process image: #{e.message}"
     end
   end
-
+  
   def system_prompt
     # Enhanced system prompt as per CURSOR.md step 3
     <<~PROMPT
@@ -157,7 +98,7 @@ class VisionAnalysisClient
       You will respond with ONLY a valid JSON object in the exact format specified. No additional text, explanations, or commentary.
     PROMPT
   end
-
+  
   def user_prompt
     # Enhanced user prompt as per CURSOR.md step 3 specifications
     <<~PROMPT
@@ -187,90 +128,64 @@ class VisionAnalysisClient
       Respond with ONLY the JSON object. No additional text, explanations, or formatting.
     PROMPT
   end
-
-  def parse_azure_response(response)
-    unless response.success?
-      raise AnalysisError, "Azure API error: #{response.code} - #{response.body}"
-    end
-
-    content = response.dig('choices', 0, 'message', 'content')
-    raise AnalysisError, "No content in Azure response" if content.blank?
-
-    parse_json_response(content)
-  end
-
-  def parse_google_response(response)
-    unless response.success?
-      raise AnalysisError, "Google API error: #{response.code} - #{response.body}"
-    end
-
-    content = response.dig('predictions', 0, 'content')
-    raise AnalysisError, "No content in Google response" if content.blank?
-
-    parse_json_response(content)
-  end
-
-  def parse_json_response(content)
-    # Enhanced output parsing as per CURSOR.md step 5
-    Rails.logger.info "Parsing API response content (length: #{content.length})"
-    
-    # Extract JSON from response (may have extra text)
-    json_match = content.match(/\{.*\}/m)
-    raise AnalysisError, "No JSON found in response" unless json_match
+  
+  def parse_openai_response(response)
+    # Enhanced output parsing
+    Rails.logger.info "Parsing OpenAI response"
     
     begin
+      content = response.dig("choices", 0, "message", "content")
+      raise AnalysisError, "No content in OpenAI response" if content.blank?
+      
+      Rails.logger.info "OpenAI response content received (length: #{content.length})"
+      
+      # Extract JSON from response (may have extra text)
+      json_match = content.match(/\{.*\}/m)
+      raise AnalysisError, "No JSON found in response" unless json_match
+      
       data = JSON.parse(json_match[0])
       Rails.logger.info "Successfully parsed JSON response"
       
-      # Validate JSON schema as per CURSOR.md requirements
+      # Validate JSON schema
       validate_response_format(data)
       
-      # Apply safety checks as per CURSOR.md step 6
+      # Apply safety checks
       apply_safety_checks(data)
       
       data
     rescue JSON::ParserError => e
       Rails.logger.error "JSON parsing failed: #{e.message}"
       raise AnalysisError, "Invalid JSON in response: #{e.message}"
+    rescue => e
+      Rails.logger.error "OpenAI response parsing failed: #{e.message}"
+      raise AnalysisError, "Failed to parse OpenAI response: #{e.message}"
     end
   end
-
+  
   def validate_response_format(data)
     required_keys = %w[skin_type concerns severity notes]
     missing_keys = required_keys - data.keys
-
+    
     if missing_keys.any?
       raise AnalysisError, "Missing required keys in response: #{missing_keys.join(', ')}"
     end
-
+    
     # Validate skin_type
     valid_skin_types = %w[dry oily combination normal unknown]
     unless valid_skin_types.include?(data['skin_type'])
       raise AnalysisError, "Invalid skin_type: #{data['skin_type']}"
     end
-
+    
     # Validate concerns
     valid_concerns = %w[acne redness dryness oiliness hyperpigmentation sensitivity]
     invalid_concerns = Array(data['concerns']) - valid_concerns
-
+    
     if invalid_concerns.any?
       raise AnalysisError, "Invalid concerns: #{invalid_concerns.join(', ')}"
     end
   end
 
-  # EU region validation for data residency (CURSOR.md step 4)
-  def validate_eu_region
-    eu_regions = %w[
-      westeurope northeurope uksouth ukwest francecentral germanywestcentral
-      norwayeast swedencentral switzerlandnorth
-    ]
-
-    unless eu_regions.any? { |region| @api_endpoint.include?(region) }
-      Rails.logger.warn "Azure endpoint may not be in EU region for data residency compliance"
-    end
-  end
-
-  # Image file validation (CURSOR.md step 2)
+  # Image file validation
   def validate_image_file(file)
     # Check file size (limit to 10MB)
     file_size = file.respond_to?(:size) ? file.size : File.size(file.path)
@@ -289,7 +204,7 @@ class VisionAnalysisClient
     Rails.logger.info "Image validation passed: #{file_size} bytes"
   end
 
-  # Safety checks for medical diagnosis prevention (CURSOR.md step 6)
+  # Safety checks for medical diagnosis prevention
   def apply_safety_checks(data)
     # Check for medical diagnosis language in notes
     medical_terms = %w[

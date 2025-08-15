@@ -32,7 +32,7 @@ This Rails 8 application provides AI-powered skin analysis and personalized skin
    rails db:create db:migrate db:seed
    ```
 
-2. **Configure Vision API:**
+2. **Configure OpenAI API:**
    
    ```bash
    # Copy the example environment file
@@ -42,11 +42,9 @@ This Rails 8 application provides AI-powered skin analysis and personalized skin
    nano .env
    ```
    
-   Set your Vision API credentials in `.env`:
+   Set your OpenAI API key in `.env`:
    ```bash
-   VISION_PROVIDER=azure
-   VISION_API_KEY=your_actual_api_key
-   VISION_API_ENDPOINT=your_actual_endpoint
+   OPENAI_API_KEY=your_actual_openai_api_key
    REDIS_URL=redis://localhost:6379/0
    ```
 
@@ -59,31 +57,22 @@ This Rails 8 application provides AI-powered skin analysis and personalized skin
    bin/dev
    ```
 
-## Vision API Setup
+## OpenAI API Setup
 
-### Azure OpenAI GPT-4o Vision (Recommended)
+### Getting Your OpenAI API Key
 
-1. Create Azure OpenAI resource in EU region (for data residency)
-2. Deploy GPT-4o model
-3. Get API key and endpoint from Azure portal
-4. Configure in your `.env` file:
+1. Go to [OpenAI Platform](https://platform.openai.com/account/api-keys)
+2. Sign up or log in to your account
+3. Create a new API key
+4. Copy the API key and add it to your `.env` file:
    ```bash
-   VISION_PROVIDER=azure
-   VISION_API_KEY=your_azure_api_key
-   VISION_API_ENDPOINT=https://your-resource.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview
+   OPENAI_API_KEY=sk-your-actual-api-key-here
    ```
 
-### Google Vertex AI Gemini (Alternative)
-
-1. Create Google Cloud project with Vertex AI enabled
-2. Set up service account with Vertex AI permissions
-3. Get authentication token
-4. Configure in your `.env` file:
-   ```bash
-   VISION_PROVIDER=google
-   VISION_API_KEY=your_google_token
-   VISION_API_ENDPOINT=https://us-central1-aiplatform.googleapis.com/v1/projects/your-project/locations/us-central1/publishers/google/models/gemini-pro-vision:predict
-   ```
+**Note**: You'll need access to GPT-4o with vision capabilities. This requires:
+- An OpenAI account with API access
+- Sufficient credits for GPT-4o usage
+- Vision API access (usually included with GPT-4o)
 
 ## Development Mode
 

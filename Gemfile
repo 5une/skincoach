@@ -35,6 +35,9 @@ gem "sidekiq"
 # HTTP client for API calls
 gem "httparty"
 
+# OpenAI API client for vision analysis
+gem "ruby-openai"
+
 # Environment variables from .env file
 gem "dotenv-rails"
 

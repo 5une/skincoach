@@ -14,7 +14,7 @@ class ConsultationsController < ApplicationController
         # Use demo job in development if explicitly enabled
         AnalyzeImageDemoJob.perform_later(@consultation)
       else
-        # Use real vision API analysis
+        # Use OpenAI vision analysis
         AnalyzeImageJob.perform_later(@consultation)
       end
       redirect_to consultation_path(@consultation)
