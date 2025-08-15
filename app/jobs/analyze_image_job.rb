@@ -1,9 +1,12 @@
+require 'timeout'
+
 class AnalyzeImageJob < ApplicationJob
   queue_as :default
   
   retry_on VisionAnalysisClient::AnalysisError, wait: :exponentially_longer, attempts: 3
   retry_on RecommendationEngine::RecommendationError, wait: 5.seconds, attempts: 2
-  retry_on Net::TimeoutError, wait: 10.seconds, attempts: 2
+  retry_on Timeout::Error, wait: 10.seconds, attempts: 2
+  retry_on Faraday::TimeoutError, wait: 10.seconds, attempts: 2
 
   def perform(consultation)
     # Update status to analyzing
