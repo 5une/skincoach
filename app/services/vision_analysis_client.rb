@@ -60,19 +60,30 @@ class VisionAnalysisClient
           validate_image_file(file)
           Base64.strict_encode64(file.read)
         end
+      elsif image_file.is_a?(String)
+        # File path as string
+        Rails.logger.info "Processing file path: #{image_file}"
+        validate_image_file(image_file)
+        File.open(image_file, 'rb') do |file|
+          Base64.strict_encode64(file.read)
+        end
       elsif image_file.respond_to?(:read)
         # File object
+        Rails.logger.info "Processing file object: #{image_file.class}"
         validate_image_file(image_file)
         Base64.strict_encode64(image_file.read)
       else
-        # File path
-        File.open(image_file, 'rb') do |file|
-          validate_image_file(file)
+        # Fallback - try to treat as file path
+        Rails.logger.info "Fallback: treating as file path"
+        validate_image_file(image_file.to_s)
+        File.open(image_file.to_s, 'rb') do |file|
           Base64.strict_encode64(file.read)
         end
       end
     rescue => e
       Rails.logger.error "Image encoding failed: #{e.message}"
+      Rails.logger.error "Image file class: #{image_file.class}"
+      Rails.logger.error "Image file methods: #{image_file.methods.grep(/read|download|path/).join(', ')}" if image_file.respond_to?(:methods)
       raise AnalysisError, "Failed to process image: #{e.message}"
     end
   end
@@ -187,8 +198,25 @@ class VisionAnalysisClient
 
   # Image file validation
   def validate_image_file(file)
+    # Handle different file types
+    if file.is_a?(String)
+      # If it's a string path, check if file exists
+      unless File.exist?(file)
+        raise AnalysisError, "Image file not found: #{file}"
+      end
+      file_size = File.size(file)
+    elsif file.respond_to?(:size)
+      # File object with size method
+      file_size = file.size
+    elsif file.respond_to?(:path)
+      # File object with path
+      file_size = File.size(file.path)
+    else
+      Rails.logger.warn "Cannot determine file size for #{file.class}"
+      return # Skip validation if we can't determine size
+    end
+
     # Check file size (limit to 10MB)
-    file_size = file.respond_to?(:size) ? file.size : File.size(file.path)
     if file_size > 10.megabytes
       raise AnalysisError, "Image file too large: #{file_size} bytes (max: 10MB)"
     end
