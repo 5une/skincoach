@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_15_220252) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_15_221004) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_220252) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "brand", null: false
+    t.string "category", null: false
+    t.decimal "price", precision: 8, scale: 2
+    t.string "currency", default: "USD"
+    t.string "product_url"
+    t.string "image_url"
+    t.integer "comedogenic_rating"
+    t.text "key_ingredients"
+    t.text "skin_concerns"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["brand"], name: "index_products_on_brand"
+    t.index ["category", "comedogenic_rating"], name: "index_products_on_category_and_comedogenic_rating"
+    t.index ["category"], name: "index_products_on_category"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
