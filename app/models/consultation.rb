@@ -36,6 +36,10 @@ class Consultation < ApplicationRecord
   end
 
   # Analysis data helpers
+  def face_detected?
+    analysis_data&.dig('face_detected') == true
+  end
+
   def skin_type
     analysis_data&.dig('skin_type')
   end

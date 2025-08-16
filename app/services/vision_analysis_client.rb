@@ -166,6 +166,7 @@ class VisionAnalysisClient
       Analyze this image and describe the facial characteristics to help with cosmetic product selection. Return JSON in this format:
 
       {
+        "face_detected": true | false,
         "skin_type": "dry" | "oily" | "combination" | "normal" | "unknown",
         "concerns": ["acne", "redness", "dryness", "oiliness", "hyperpigmentation", "sensitivity"],
         "severity": {
@@ -174,11 +175,22 @@ class VisionAnalysisClient
         "notes": "Brief appearance description for product recommendations"
       }
 
-      Look at the image and:
+      IMPORTANT: First determine if this image shows a human face:
+      - If you can see a clear human face with visible facial skin, set "face_detected": true
+      - If this is not a face, or shows objects/animals/landscapes/etc., set "face_detected": false
+      - Only analyze skin characteristics if face_detected is true
+
+      If face_detected is true:
       - Identify the apparent skin type from the options
       - Note any visible characteristics from the concern list
       - Rate visibility levels as mild, moderate, or noticeable
-      - Write brief notes about appearance for product matching
+      - Write brief notes about facial skin for product matching
+
+      If face_detected is false:
+      - Set skin_type to "unknown"
+      - Set concerns to empty array []
+      - Set severity to empty object {}
+      - Write a note explaining this is not a facial image
 
       This is for cosmetic product recommendations. Return only the JSON.
     PROMPT
@@ -198,6 +210,7 @@ class VisionAnalysisClient
       Describe this photo using the following JSON structure for categorization purposes:
 
       {
+        "face_detected": true | false,
         "skin_type": "dry" | "oily" | "combination" | "normal" | "unknown",
         "concerns": ["acne", "redness", "dryness", "oiliness", "hyperpigmentation", "sensitivity"],
         "severity": {
@@ -205,6 +218,10 @@ class VisionAnalysisClient
         },
         "notes": "Description of what you see in the image"
       }
+
+      First determine if you can see a human face in this image:
+      - If yes, set face_detected to true and analyze the facial skin
+      - If no, set face_detected to false and set other fields to defaults (skin_type: "unknown", concerns: [], severity: {})
 
       Just describe what you observe in the photo using these categories. Return only JSON.
     PROMPT
@@ -244,11 +261,16 @@ class VisionAnalysisClient
   end
 
   def validate_response_format(data)
-    required_keys = %w[skin_type concerns severity notes]
+    required_keys = %w[face_detected skin_type concerns severity notes]
     missing_keys = required_keys - data.keys
 
     if missing_keys.any?
       raise AnalysisError, "Missing required keys in response: #{missing_keys.join(', ')}"
+    end
+
+    # Validate face_detected
+    unless [true, false].include?(data['face_detected'])
+      raise AnalysisError, "Invalid face_detected value: #{data['face_detected']}"
     end
 
     # Validate skin_type
@@ -322,6 +344,16 @@ class VisionAnalysisClient
 
   # Safety checks for cosmetic focus and policy compliance
   def apply_safety_checks(data)
+    # Check if face was detected - if not, override analysis
+    unless data['face_detected']
+      Rails.logger.warn "No face detected in uploaded image"
+      data['skin_type'] = 'unknown'
+      data['concerns'] = []
+      data['severity'] = {}
+      data['notes'] = "No facial skin detected in this image. Please upload a clear photo of your face for skin analysis."
+      return data
+    end
+
     # Check for medical diagnosis language in notes
     medical_terms = %w[
       diagnose diagnosis disease disorder syndrome condition
@@ -352,5 +384,6 @@ class VisionAnalysisClient
     end
 
     Rails.logger.info "Safety checks applied successfully"
+    data
   end
 end
