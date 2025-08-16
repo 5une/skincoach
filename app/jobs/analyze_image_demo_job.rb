@@ -13,10 +13,10 @@ class AnalyzeImageDemoJob < ApplicationJob
       skin_type: ['dry', 'oily', 'combination', 'normal'].sample,
       concerns: ['acne', 'redness', 'dryness', 'oiliness', 'hyperpigmentation'].sample(rand(1..3)),
       severity: {
-        'acne' => ['mild', 'moderate'].sample,
-        'redness' => ['mild', 'moderate'].sample
+        'acne' => ['mild', 'moderate', 'noticeable'].sample,
+        'redness' => ['mild', 'moderate', 'noticeable'].sample
       },
-      notes: "Based on the image analysis, your skin shows signs of the identified concerns. We recommend a gentle skincare routine with the suggested products."
+      notes: "Cosmetic skin characteristics observed for skincare product selection. Consider a gentle routine with suitable products for your skin type."
     }
 
     # Generate demo recommendations using actual products from database
