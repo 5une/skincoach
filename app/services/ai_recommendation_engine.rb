@@ -1,15 +1,15 @@
 class AiRecommendationEngine
   class RecommendationError < StandardError; end
-  
+
   def initialize(analysis_data)
     @face_detected = analysis_data["face_detected"]
     @skin_type = analysis_data["skin_type"]
     @concerns = Array(analysis_data["concerns"])
     @severity = analysis_data["severity"] || {}
     @notes = analysis_data["notes"]
-    @openai_client = OpenAI::Client.new(access_token: ENV['OPENAI_API_KEY'])
+    @openai_client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
   end
-  
+
   def generate_recommendations
     # Don't generate product recommendations if no face was detected
     unless @face_detected
@@ -21,29 +21,27 @@ class AiRecommendationEngine
 
     begin
       Rails.logger.info "Starting AI-powered product recommendation generation"
-      
+
       # Get all available products from database
       products_data = prepare_products_data
-      
+
       # Use AI to select best products for each category
       ai_selections = get_ai_product_selections(products_data)
-      
+
       # Format the selections into the expected structure
       format_recommendations(ai_selections)
-      
+
     rescue => e
       Rails.logger.error "AI recommendation generation failed: #{e.message}"
-      # Fallback to basic recommendation engine
-      fallback_recommendations
     end
   end
-  
+
   private
-  
+
   def prepare_products_data
     # Group products by category with essential information
     products_by_category = {}
-    
+
     Product::CATEGORIES.each do |category|
       products = Product.by_category(category).map do |product|
         {
@@ -58,19 +56,19 @@ class AiRecommendationEngine
           image_url: product.image_url
         }
       end
-      
+
       products_by_category[category] = products if products.any?
     end
-    
+
     products_by_category
   end
-  
+
   def get_ai_product_selections(products_data)
     system_prompt = build_system_prompt
     user_prompt = build_user_prompt(products_data)
-    
+
     Rails.logger.info "Sending product recommendation request to OpenAI"
-    
+
     response = @openai_client.chat(
       parameters: {
         model: "gpt-4o",
@@ -82,27 +80,27 @@ class AiRecommendationEngine
         temperature: 0.3
       }
     )
-    
+
     content = response.dig("choices", 0, "message", "content")
     raise RecommendationError, "No content in OpenAI response" if content.blank?
-    
+
     # Extract JSON from response
     json_match = content.match(/\{.*\}/m)
     raise RecommendationError, "No JSON found in response" unless json_match
-    
+
     JSON.parse(json_match[0])
   rescue JSON::ParserError => e
     Rails.logger.error "JSON parsing failed: #{e.message}"
     raise RecommendationError, "Invalid JSON in recommendation response"
   end
-  
+
   def build_system_prompt
     <<~PROMPT
       You are an expert skincare consultant AI that recommends products from a curated database based on detailed skin analysis. Your role is to:
 
       1. Analyze the user's specific skin profile (type, concerns, severity levels)
-      2. Select the most suitable products from the provided database
-      3. Consider ingredient compatibility, effectiveness, and user needs
+      2. Select ONLY the necessary products from the provided database
+      3. Recommend only categories that are actually needed for this skin profile
       4. Provide scientific rationale for your selections
 
       Key Principles:
@@ -112,15 +110,18 @@ class AiRecommendationEngine
       - Balance effectiveness with gentleness
       - Select products that work well together
       - Consider budget-friendly and premium options
+      - Don't over-recommend - only suggest what's truly needed
+
+      Important: Not every skin profile needs products from all categories. Be selective and recommend only what will benefit this specific user.
 
       Respond ONLY with valid JSON in the exact format specified.
     PROMPT
   end
-  
+
   def build_user_prompt(products_data)
     concerns_text = @concerns.any? ? @concerns.join(", ") : "none specified"
     severity_text = @severity.any? ? @severity.map { |k, v| "#{k}: #{v}" }.join(", ") : "none specified"
-    
+
     <<~PROMPT
       Analyze this skin profile and recommend the BEST products from our database:
 
@@ -133,7 +134,7 @@ class AiRecommendationEngine
       AVAILABLE PRODUCTS:
       #{format_products_for_ai(products_data)}
 
-      TASK: Select 2-3 best products per category that are most suitable for this skin profile.
+      TASK: Recommend ONLY the necessary products for this specific skin profile. You don't need to select from every category - only recommend categories that are needed based on the skin analysis.
 
       SELECTION CRITERIA:
       - Match active ingredients to skin concerns
@@ -142,79 +143,74 @@ class AiRecommendationEngine
       - Prioritize proven ingredients for specific concerns
       - Consider price range variety
       - Ensure products complement each other
+      - Only recommend categories that are actually needed for this skin profile
+
+      CATEGORY GUIDELINES:
+      - cleanser: Always needed for basic skincare
+      - moisturizer: Always needed for hydration
+      - sunscreen: Always needed for protection
+      - serum: Only if specific concerns need targeted treatment
+      - spot_treatment: Only if acne is present
 
       Return JSON in this EXACT format:
       {
         "selections": {
           "cleanser": [product_id1, product_id2],
-          "serum": [product_id1, product_id2, product_id3],
           "moisturizer": [product_id1, product_id2],
           "sunscreen": [product_id1, product_id2],
-          "spot_treatment": [product_id1, product_id2]
+          "serum": [product_id1, product_id2],
+          "spot_treatment": [product_id1]
         },
-        "rationale": "Detailed explanation of why these specific products were chosen based on the skin analysis, mentioning key ingredients and how they address the identified concerns."
+        "rationale": "Detailed explanation of why these specific products and categories were chosen based on the skin analysis, mentioning key ingredients and how they address the identified concerns."
       }
+
+      IMPORTANT: Only include categories in the selections object that are actually needed. For example, if no acne is present, don't include spot_treatment. If skin is normal with no specific concerns, you might only need cleanser, moisturizer, and sunscreen.
 
       Select only products that exist in the provided database. Return ONLY the JSON.
     PROMPT
   end
-  
+
   def format_products_for_ai(products_data)
     formatted = []
-    
+
     products_data.each do |category, products|
       formatted << "\n#{category.upcase}:"
       products.each do |product|
         formatted << "ID: #{product[:id]} | #{product[:brand]} #{product[:name]} | $#{product[:price]} | Ingredients: #{product[:key_ingredients]} | For: #{product[:skin_concerns]} | Comedogenic: #{product[:comedogenic_rating] || 'N/A'}"
       end
     end
-    
+
     formatted.join("\n")
   end
-  
+
   def format_recommendations(ai_selections)
     selections = ai_selections["selections"] || {}
     rationale = ai_selections["rationale"] || "Products selected based on skin analysis."
-    
+
     picks = {}
-    
+
     Product::CATEGORIES.each do |category|
       product_ids = Array(selections[category]).compact
       next if product_ids.empty?
-      
+
       products = Product.where(id: product_ids).map do |product|
         {
-          'name' => product.name,
-          'brand' => product.brand,
-          'price' => product.price.to_f,
-          'url' => product.product_url,
-          'image' => product.image_url,
-          'tags' => product.skin_concerns_array,
-          'ingredients' => product.key_ingredients_array
+          "name" => product.name,
+          "brand" => product.brand,
+          "price" => product.price.to_f,
+          "url" => product.product_url,
+          "image" => product.image_url,
+          "tags" => product.skin_concerns_array,
+          "ingredients" => product.key_ingredients_array
         }
       end
-      
+
       picks[category] = products if products.any?
     end
-    
+
     {
       picks: picks,
       rationale: rationale
     }
-  end
-  
-  def fallback_recommendations
-    Rails.logger.info "Using fallback recommendation engine"
-    
-    # Create a basic RecommendationEngine instance for fallback
-    analysis_data = {
-      "face_detected" => @face_detected,
-      "skin_type" => @skin_type,
-      "concerns" => @concerns,
-      "severity" => @severity
-    }
-    
-    basic_engine = RecommendationEngine.new(analysis_data)
-    basic_engine.generate_recommendations
   end
 end
