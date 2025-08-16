@@ -99,6 +99,19 @@
                   <% end %>
                 </div>
               <% end %>
+
+              <% if product['ingredients'].present? %>
+                <div class="mb-3">
+                  <p class="text-xs text-gray-500 mb-1">Key Ingredients:</p>
+                  <div class="flex flex-wrap gap-1">
+                    <% Array(product['ingredients']).first(3).each do |ingredient| %>
+                      <span class="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded">
+                        <%= ingredient.strip.titleize %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
               
               <% if product['url'].present? %>
                 <a href="<%= product['url'] %>" target="_blank" rel="noopener"

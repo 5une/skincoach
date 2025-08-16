@@ -20,8 +20,8 @@ class AnalyzeImageDemoJob < ApplicationJob
       notes: "Cosmetic skin characteristics observed for skincare product selection. Consider a gentle routine with suitable products for your skin type."
     }
 
-    # Generate demo recommendations using actual products from database
-    demo_recommendations = generate_demo_recommendations(demo_analysis[:concerns])
+    # Generate demo recommendations using AI engine or fallback
+    demo_recommendations = generate_ai_recommendations(demo_analysis)
 
     # Update consultation with results
     consultation.update!(
@@ -38,6 +38,17 @@ class AnalyzeImageDemoJob < ApplicationJob
   end
 
   private
+
+  def generate_ai_recommendations(analysis_data)
+    # Try AI recommendations first, fallback to demo if needed
+    begin
+      ai_engine = AiRecommendationEngine.new(analysis_data)
+      ai_engine.generate_recommendations
+    rescue => e
+      Rails.logger.warn "AI recommendations failed in demo, using fallback: #{e.message}"
+      generate_demo_recommendations(analysis_data[:concerns])
+    end
+  end
 
   def generate_demo_recommendations(concerns)
     picks = {}
