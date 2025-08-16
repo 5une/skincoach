@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-  <div class="w-full px-4 py-8">
+  <div class="w-full px-6 py-8">
     <div class="w-full">
       <!-- Header -->
       <div class="text-center mb-8">
@@ -12,7 +12,7 @@
       </div>
 
       <!-- Upload Form -->
-      <div class="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
+      <div class="bg-white rounded-lg shadow-lg p-8 w-full">
         <%= form_with model: @consultation, local: true, multipart: true, data: { controller: "uploader" }, class: "space-y-6" do |form| %>
           <!-- File Input -->
           <div class="space-y-4">
@@ -69,7 +69,7 @@
       </div>
 
       <!-- Features -->
-      <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
         <div class="text-center">
           <div class="bg-white rounded-lg p-6 shadow-md">
             <div class="text-3xl mb-3">🔍</div>
