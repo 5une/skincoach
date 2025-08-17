@@ -49,12 +49,11 @@ RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
-# Copy package.json and install Node.js dependencies if they exist
-COPY package*.json ./ 2>/dev/null || :
-RUN if [ -f package.json ]; then npm ci --only=production; fi
-
 # Copy application code
 COPY . .
+
+# Install Node.js dependencies if package.json exists
+RUN if [ -f package.json ]; then npm ci --only=production; fi
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/

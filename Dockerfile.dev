@@ -35,12 +35,11 @@ ENV RAILS_ENV=development \
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-# Copy package.json if it exists and install npm packages
-COPY package*.json ./ 2>/dev/null || :
-RUN if [ -f package.json ]; then npm install; fi
-
 # Copy application code
 COPY . .
+
+# Install npm packages if package.json exists
+RUN if [ -f package.json ]; then npm install; fi
 
 # Create directories and set permissions
 RUN mkdir -p /rails/storage /rails/log /rails/tmp && \
