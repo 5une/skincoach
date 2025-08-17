@@ -1,0 +1,53 @@
+# Development Dockerfile for Rails Skin Dermatology Chatbot
+FROM ruby:3.4.2-slim
+
+# Install system dependencies
+RUN apt-get update -qq && \
+    apt-get install -y \
+      build-essential \
+      curl \
+      git \
+      libjemalloc2 \
+      libpq-dev \
+      libvips \
+      libffi-dev \
+      libyaml-dev \
+      libgdbm-dev \
+      libncurses5-dev \
+      libreadline-dev \
+      libssl-dev \
+      pkg-config \
+      sqlite3 \
+      node.js \
+      npm && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives
+
+# Set working directory
+WORKDIR /rails
+
+# Set environment variables
+ENV RAILS_ENV=development \
+    BUNDLE_PATH=/usr/local/bundle \
+    BUNDLE_JOBS=4 \
+    BUNDLE_RETRY=3
+
+# Copy Gemfile and install gems
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+# Copy package.json if it exists and install npm packages
+COPY package*.json ./ 2>/dev/null || :
+RUN if [ -f package.json ]; then npm install; fi
+
+# Copy application code
+COPY . .
+
+# Create directories and set permissions
+RUN mkdir -p /rails/storage /rails/log /rails/tmp && \
+    chmod -R 755 /rails/storage /rails/log /rails/tmp
+
+# Expose port
+EXPOSE 3000
+
+# Start Rails server
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]

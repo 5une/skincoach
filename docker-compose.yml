@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Redis for Sidekiq background jobs and caching
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Main Rails application
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - RAILS_ENV=production
+      - REDIS_URL=redis://redis:6379/0
+      - RAILS_MASTER_KEY
+      - OPENAI_API_KEY
+      - SECRET_KEY_BASE
+    volumes:
+      - ./storage:/rails/storage
+      - rails_logs:/rails/log
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Sidekiq worker for background jobs (image analysis, AI recommendations)
+  sidekiq:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: bundle exec sidekiq
+    environment:
+      - RAILS_ENV=production
+      - REDIS_URL=redis://redis:6379/0
+      - RAILS_MASTER_KEY
+      - OPENAI_API_KEY
+      - SECRET_KEY_BASE
+    volumes:
+      - ./storage:/rails/storage
+      - rails_logs:/rails/log
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  rails_logs:

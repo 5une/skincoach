@@ -21,7 +21,7 @@ class VisionAnalysisClient
       { model: "gpt-4o-mini", system: fallback_system_prompt, user: fallback_user_prompt, desc: "fallback" },
       { model: "gpt-4o", system: fallback_system_prompt, user: fallback_user_prompt, desc: "fallback" }
     ]
-    
+
     response = nil
 
     strategies.each_with_index do |strategy, index|
@@ -269,7 +269,7 @@ class VisionAnalysisClient
     end
 
     # Validate face_detected
-    unless [true, false].include?(data['face_detected'])
+    unless [ true, false ].include?(data["face_detected"])
       raise AnalysisError, "Invalid face_detected value: #{data['face_detected']}"
     end
 
@@ -345,12 +345,12 @@ class VisionAnalysisClient
   # Safety checks for cosmetic focus and policy compliance
   def apply_safety_checks(data)
     # Check if face was detected - if not, override analysis
-    unless data['face_detected']
+    unless data["face_detected"]
       Rails.logger.warn "No face detected in uploaded image"
-      data['skin_type'] = 'unknown'
-      data['concerns'] = []
-      data['severity'] = {}
-      data['notes'] = "No facial skin detected in this image. Please upload a clear photo of your face for skin analysis."
+      data["skin_type"] = "unknown"
+      data["concerns"] = []
+      data["severity"] = {}
+      data["notes"] = "No facial skin detected in this image. Please upload a clear photo of your face for skin analysis."
       return data
     end
 

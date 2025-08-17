@@ -12,6 +12,13 @@ default: &default
 development:
   <<: *default
   database: storage/development.sqlite3
+  # Uncomment below for PostgreSQL in Docker development
+  # adapter: postgresql
+  # encoding: unicode
+  # host: db
+  # username: postgres
+  # password: password
+  # database: skin_dermatology_chatbot_development
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".

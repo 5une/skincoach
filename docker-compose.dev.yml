@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # Redis for Sidekiq and caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    restart: unless-stopped
+
+  # PostgreSQL for development (more production-like than SQLite)
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: skin_dermatology_chatbot_development
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # Rails development server
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@db:5432/skin_dermatology_chatbot_development
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+      - node_modules:/rails/node_modules
+      - ./storage:/rails/storage
+    depends_on:
+      - db
+      - redis
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  # Sidekiq worker for development
+  sidekiq:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: bundle exec sidekiq
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@db:5432/skin_dermatology_chatbot_development
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+      - ./storage:/rails/storage
+    depends_on:
+      - db
+      - redis
+      - web
+    restart: unless-stopped
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+  bundle_cache:
+  node_modules:

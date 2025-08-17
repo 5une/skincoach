@@ -4,7 +4,7 @@ class AnalyzeImageJob < ApplicationJob
   queue_as :default
 
   retry_on VisionAnalysisClient::AnalysisError, wait: :exponentially_longer, attempts: 3
-  retry_on RecommendationEngine::RecommendationError, wait: 5.seconds, attempts: 2
+  retry_on AiRecommendationEngine::RecommendationError, wait: 5.seconds, attempts: 2
   retry_on Timeout::Error, wait: 10.seconds, attempts: 2
   retry_on Faraday::TimeoutError, wait: 10.seconds, attempts: 2
 
@@ -33,7 +33,7 @@ class AnalyzeImageJob < ApplicationJob
 
   rescue VisionAnalysisClient::AnalysisError => e
     handle_analysis_error(consultation, "Vision analysis failed: #{e.message}", e)
-  rescue RecommendationEngine::RecommendationError => e
+  rescue AiRecommendationEngine::RecommendationError => e
     handle_analysis_error(consultation, "Recommendation generation failed: #{e.message}", e)
   rescue StandardError => e
     handle_analysis_error(consultation, "Unexpected error during analysis: #{e.message}", e)

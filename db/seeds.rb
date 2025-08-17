@@ -224,7 +224,7 @@ products_data.each_with_index do |product_data, index|
   product_data[:currency] ||= 'USD'
   product_data[:product_url] ||= "https://example.com/#{product_data[:brand].downcase.gsub(' ', '-')}-#{product_data[:name].downcase.gsub(' ', '-')}"
   product_data[:image_url] ||= "https://example.com/#{product_data[:brand].downcase.gsub(' ', '-')}-#{product_data[:name].downcase.gsub(' ', '-')}.jpg"
-  
+
   begin
     product = Product.create!(product_data)
     puts "Created product #{index + 1}/#{products_data.length}: #{product.brand} #{product.name}"
