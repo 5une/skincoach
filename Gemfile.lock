@@ -279,6 +279,8 @@ GEM
     rdoc (6.14.2)
       erb
       psych (>= 4.0.0)
+    redis (5.4.1)
+      redis-client (>= 0.22.0)
     redis-client (0.25.2)
       connection_pool
     regexp_parser (2.11.2)
@@ -416,6 +418,7 @@ DEPENDENCIES
   pry-rails
   puma (>= 5.0)
   rails (~> 8.0.2)
+  redis
   rubocop-rails-omakase
   ruby-openai
   sidekiq
