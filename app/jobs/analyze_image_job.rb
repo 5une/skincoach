@@ -46,6 +46,12 @@ class AnalyzeImageJob < ApplicationJob
       raise VisionAnalysisClient::AnalysisError, "No photo attached to consultation"
     end
 
+    Rails.logger.info "Photo attached: #{consultation.photo.attached?}"
+    Rails.logger.info "Photo blob key: #{consultation.photo.blob.key}"
+    Rails.logger.info "Photo filename: #{consultation.photo.filename}"
+    Rails.logger.info "Photo content type: #{consultation.photo.blob.content_type}"
+    Rails.logger.info "Photo service class: #{consultation.photo.blob.service.class}"
+
     # Initialize vision client
     vision_client = VisionAnalysisClient.new
 

@@ -84,36 +84,50 @@ class VisionAnalysisClient
     Rails.logger.info "Preparing image for analysis: #{image_file.class}"
 
     begin
-      if image_file.respond_to?(:download)
-        # Active Storage attachment - download and encode
-        Rails.logger.info "Processing Active Storage attachment: #{image_file.filename}"
-
-        # First try to get content directly from blob to avoid file path issues
-        if image_file.respond_to?(:blob) && image_file.blob.respond_to?(:download)
-          Rails.logger.info "Using blob.download method to avoid file path issues"
+      if image_file.respond_to?(:blob) && image_file.blob.respond_to?(:download)
+        # Active Storage attachment - use blob.download for cross-dyno compatibility
+        Rails.logger.info "Processing Active Storage attachment: #{image_file.filename} (blob key: #{image_file.blob.key})"
+        
+        begin
+          # Use blob.download which works across dynos on Heroku
           content = image_file.blob.download
+          Rails.logger.info "Successfully downloaded blob content: #{content.bytesize} bytes"
 
           # Basic size validation
           if content.bytesize > 10.megabytes
             raise AnalysisError, "Image file too large: #{content.bytesize} bytes (max: 10MB)"
           end
 
-          Base64.strict_encode64(content)
-        else
-          # Fallback to file download method
-          image_file.download do |file|
-            # Log file path for debugging null byte issues
-            file_path = file.respond_to?(:path) ? file.path : "unknown"
-            Rails.logger.info "Downloaded file path: #{file_path.inspect}"
-
-            # Validate image size and format
-            validate_image_file(file)
-
-            # Read file content directly from file object to avoid path issues
-            file.rewind if file.respond_to?(:rewind)
-            content = file.read
-            Base64.strict_encode64(content)
+          # Validate content type if available
+          if image_file.blob.content_type.present?
+            allowed_types = %w[image/jpeg image/jpg image/png image/webp]
+            unless allowed_types.include?(image_file.blob.content_type.downcase)
+              raise AnalysisError, "Unsupported image format: #{image_file.blob.content_type}"
+            end
           end
+
+          Base64.strict_encode64(content)
+        rescue => e
+          Rails.logger.error "Failed to download blob: #{e.message}"
+          Rails.logger.error "Blob info - key: #{image_file.blob.key}, service: #{image_file.blob.service.class}, stored: #{image_file.blob.service.exist?(image_file.blob.key)}"
+          raise AnalysisError, "Failed to access uploaded file: #{e.message}"
+        end
+      elsif image_file.respond_to?(:download)
+        # Fallback to attachment download method
+        Rails.logger.info "Using attachment download method for: #{image_file.class}"
+        
+        image_file.download do |file|
+          # Log file path for debugging
+          file_path = file.respond_to?(:path) ? file.path : "unknown"
+          Rails.logger.info "Downloaded file path: #{file_path.inspect}"
+
+          # Validate image size and format
+          validate_image_file(file)
+
+          # Read file content directly from file object
+          file.rewind if file.respond_to?(:rewind)
+          content = file.read
+          Base64.strict_encode64(content)
         end
       elsif image_file.is_a?(String)
         # File path as string - sanitize path to remove null bytes
