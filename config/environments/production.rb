@@ -48,7 +48,14 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Use Redis for caching in production
-  config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/1") }
+  redis_cache_config = { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/1") }
+  
+  # Configure SSL settings for Heroku Redis
+  if ENV["REDIS_URL"]&.start_with?("rediss://")
+    redis_cache_config[:ssl_params] = { verify_mode: OpenSSL::SSL::VERIFY_NONE }
+  end
+  
+  config.cache_store = :redis_cache_store, redis_cache_config
   
   # Use Sidekiq for background job processing (Heroku Redis addon will provide REDIS_URL)
   config.active_job.queue_adapter = :sidekiq
