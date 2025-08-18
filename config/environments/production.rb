@@ -23,6 +23,10 @@ Rails.application.configure do
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
+  
+  # Disable automatic analysis for uploaded files to avoid cross-dyno issues on Heroku
+  # We handle analysis manually in our custom jobs
+  config.active_storage.analyze_after_upload = false
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
