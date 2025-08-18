@@ -1,0 +1,60 @@
+{
+  "name": "Skin Dermatology Chatbot",
+  "description": "AI-powered dermatology consultation chatbot with image analysis",
+  "website": "https://github.com/yourusername/skin-dermatology-chatbot",
+  "repository": "https://github.com/yourusername/skin-dermatology-chatbot",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "success_url": "/",
+  "keywords": ["ruby", "rails", "ai", "dermatology", "healthcare", "chatbot"],
+  "image": "heroku/ruby",
+  "stack": "heroku-24",
+  "buildpacks": [
+    {
+      "url": "heroku/ruby"
+    },
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    },
+    "worker": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-redis:mini"
+    }
+  ],
+  "env": {
+    "RAILS_ENV": {
+      "value": "production"
+    },
+    "RAILS_SERVE_STATIC_FILES": {
+      "value": "true"
+    },
+    "RAILS_LOG_TO_STDOUT": {
+      "value": "true"
+    },
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API key for vision analysis",
+      "required": true
+    },
+    "SECRET_KEY_BASE": {
+      "description": "Rails secret key base",
+      "generator": "secret"
+    },
+    "RAILS_MASTER_KEY": {
+      "description": "Rails master key for credentials",
+      "required": true
+    }
+  },
+  "scripts": {
+    "postdeploy": "bundle exec rails db:migrate && bundle exec rails db:seed"
+  }
+}

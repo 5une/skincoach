@@ -28,6 +28,7 @@ Rails.application.configure do
   config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+  # Note: Heroku handles SSL termination, so this is safe to enable
   config.force_ssl = true
 
   # Skip http-to-https redirect for the default health check endpoint.
@@ -48,8 +49,8 @@ Rails.application.configure do
 
   # Use Redis for caching in production
   config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/1") }
-
-  # Use Sidekiq for background job processing
+  
+  # Use Sidekiq for background job processing (Heroku Redis addon will provide REDIS_URL)
   config.active_job.queue_adapter = :sidekiq
 
   # Ignore bad email addresses and do not raise email delivery errors.
@@ -79,11 +80,12 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
+  # Allow Heroku app domains - configure your actual domain when you have it
+  config.hosts = [
+    /.*\.herokuapp\.com/,  # Allow Heroku app domains
+    /.*\.heroku\.com/      # Allow Heroku review apps
+  ]
   #
   # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end

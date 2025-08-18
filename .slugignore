@@ -1,0 +1,20 @@
+# Files and directories to exclude from Heroku slug
+/test
+/spec
+*.md
+README*
+SETUP*
+DOCKER*
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+.git
+.gitignore
+.env*
+/log/*.log
+/tmp
+/storage/*.sqlite3
+/coverage
+.rspec
+.rubocop.yml
+.byebug_history
