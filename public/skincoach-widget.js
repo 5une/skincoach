@@ -125,7 +125,9 @@ window.SkinCoach = (function() {
         // Headers: # Header, ## Header, ### Header
         .replace(/^### (.*$)/gm, '<h3 style="font-size:16px;font-weight:600;margin:12px 0 6px 0;">$1</h3>')
         .replace(/^## (.*$)/gm, '<h2 style="font-size:18px;font-weight:600;margin:12px 0 6px 0;">$1</h2>')
-        .replace(/^# (.*$)/gm, '<h1 style="font-size:20px;font-weight:600;margin:12px 0 6px 0;">$1</h1>');
+        .replace(/^# (.*$)/gm, '<h1 style="font-size:20px;font-weight:600;margin:12px 0 6px 0;">$1</h1>')
+        // Disclaimer text: ⚠️ Important: text
+        .replace(/⚠️\s*Important:\s*(.*)/g, '<div style="margin-top:16px;padding:8px 12px;background:#f8f9fa;border-left:3px solid #ffc107;border-radius:4px;"><span style="font-size:12px;color:#666;font-style:italic;line-height:1.4;">⚠️ <strong>Important:</strong> $1</span></div>');
     }
   };
 
