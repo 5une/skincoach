@@ -189,7 +189,7 @@ window.SkinCoach = (function() {
     const photoBtn = document.getElementById('skincoach-photo-btn');
 
     // Add message to chat
-    function addMessage(content, isUser = false) {
+    function addMessage(content, isUser = false, imageFile = null) {
       const messageDiv = document.createElement('div');
       messageDiv.style.cssText = `
         background: ${isUser ? '#667eea' : 'white'};
@@ -199,10 +199,61 @@ window.SkinCoach = (function() {
         margin-bottom: 12px;
         max-width: 85%;
         ${isUser ? 'margin-left: auto;' : ''}
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       `;
-      messageDiv.innerHTML = content;
+      
+      let messageContent = '';
+      
+      // Add image if provided
+      if (imageFile) {
+        const imageUrl = URL.createObjectURL(imageFile);
+        messageContent += `
+          <div style="margin-bottom: 8px;">
+            <img src="${imageUrl}" alt="Uploaded skin photo" style="
+              max-width: 200px;
+              max-height: 200px;
+              border-radius: 8px;
+              object-fit: cover;
+              border: 2px solid ${isUser ? 'rgba(255,255,255,0.3)' : '#e0e0e0'};
+            ">
+          </div>
+        `;
+      }
+      
+      // Add text content
+      messageContent += content;
+      
+      messageDiv.innerHTML = messageContent;
       messages.appendChild(messageDiv);
       messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Add typing indicator
+    function addTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typing-indicator';
+      typingDiv.style.cssText = `
+        background: white;
+        color: #666;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        max-width: 85%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-style: italic;
+      `;
+      typingDiv.innerHTML = '🤔 Analyzing...';
+      messages.appendChild(typingDiv);
+      messages.scrollTop = messages.scrollHeight;
+      return typingDiv;
+    }
+
+    // Remove typing indicator
+    function removeTypingIndicator() {
+      const indicator = document.getElementById('typing-indicator');
+      if (indicator) {
+        indicator.remove();
+      }
     }
 
     // Send chat message
@@ -214,11 +265,10 @@ window.SkinCoach = (function() {
       input.value = '';
       
       try {
-        addMessage('Thinking...', false);
+        const typingIndicator = addTypingIndicator();
         const response = await api.sendMessage(message);
         
-        // Remove "Thinking..." message
-        messages.removeChild(messages.lastChild);
+        removeTypingIndicator();
         
         if (response.status === 'success') {
           addMessage(response.response, false);
@@ -226,52 +276,113 @@ window.SkinCoach = (function() {
           addMessage('Sorry, I had trouble understanding that. Please try again.', false);
         }
       } catch (error) {
-        messages.removeChild(messages.lastChild);
+        removeTypingIndicator();
         addMessage('Sorry, there was an error processing your message.', false);
       }
     }
 
-    // Analyze photo
-    async function analyzePhoto() {
-      const file = photoInput.files[0];
-      if (!file) return;
+    // Drag and drop functionality for chat area
+    function setupDragAndDrop() {
+      const chatArea = document.getElementById('skincoach-messages');
       
-      addMessage('📸 Photo uploaded, analyzing...', true);
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        chatArea.addEventListener(eventName, preventDefaults, false);
+      });
       
-      try {
-        const response = await api.analyzePhoto(file);
-        
-        if (response.status === 'success') {
-          const analysis = response.analysis;
-          const recommendations = response.recommendations;
-          
-          let resultHtml = '<strong>Analysis Results:</strong><br>';
-          if (analysis.face_detected) {
-            resultHtml += `Skin Type: ${analysis.skin_type}<br>`;
-            if (analysis.concerns && analysis.concerns.length > 0) {
-              resultHtml += `Concerns: ${analysis.concerns.join(', ')}<br>`;
-            }
-            resultHtml += `Notes: ${analysis.notes}<br><br>`;
-            
-            if (recommendations.recommended_products && recommendations.recommended_products.length > 0) {
-              resultHtml += '<strong>Recommended Products:</strong><br>';
-              recommendations.recommended_products.slice(0, 3).forEach(product => {
-                resultHtml += `• ${product.name} (${product.category})<br>`;
-              });
-            }
-          } else {
-            resultHtml += 'No face detected in the image. Please upload a clear photo of your face.';
-          }
-          
-          addMessage(resultHtml, false);
-        } else {
-          addMessage('Sorry, I had trouble analyzing your photo. Please try again.', false);
-        }
-      } catch (error) {
-        addMessage('Sorry, there was an error analyzing your photo.', false);
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
       }
       
-      photoInput.value = '';
+      ['dragenter', 'dragover'].forEach(eventName => {
+        chatArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        chatArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight(e) {
+        chatArea.style.background = 'linear-gradient(135deg, #f0f8ff, #e6f3ff)';
+        chatArea.style.border = '2px dashed #667eea';
+      }
+      
+      function unhighlight(e) {
+        chatArea.style.background = '#f8f9fa';
+        chatArea.style.border = 'none';
+      }
+      
+      chatArea.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+          const file = files[0];
+          if (file.type.startsWith('image/')) {
+            // Process the dropped image
+            processImageFile(file);
+          } else {
+            addMessage('❌ Please drop an image file (JPEG, PNG, etc.)', false);
+          }
+        }
+      }
+    }
+    
+    // Process image file (from drag/drop or file input)
+    async function processImageFile(file) {
+      // Show uploaded image with a message
+      addMessage('📸 Analyzing your skin photo...', true, file);
+      
+      try {
+        const typingIndicator = addTypingIndicator();
+        const response = await api.analyzePhoto(file);
+        
+        removeTypingIndicator();
+        
+        if (response.status === 'success') {
+          // Use the conversational response from the AI
+          if (response.response) {
+            addMessage(response.response, false);
+          } else {
+            // Fallback to structured display if no conversational response
+            const analysis = response.analysis;
+            const recommendations = response.recommendations;
+            
+            let resultHtml = '<strong>✨ Skin Analysis Results:</strong><br><br>';
+            if (analysis && analysis.face_detected) {
+              resultHtml += `<strong>Skin Type:</strong> ${analysis.skin_type}<br>`;
+              if (analysis.concerns && analysis.concerns.length > 0) {
+                resultHtml += `<strong>Concerns:</strong> ${analysis.concerns.join(', ')}<br>`;
+              }
+              if (analysis.notes) {
+                resultHtml += `<strong>Notes:</strong> ${analysis.notes}<br><br>`;
+              }
+              
+              // Show recommendations if available
+              if (recommendations && recommendations.picks) {
+                resultHtml += '<strong>🛍️ Product Recommendations:</strong><br>';
+                Object.entries(recommendations.picks).forEach(([category, products]) => {
+                  if (products && products.length > 0) {
+                    const product = products[0]; // Show first product
+                    resultHtml += `<strong>${category.charAt(0).toUpperCase() + category.slice(1)}:</strong> ${product.brand} ${product.name}<br>`;
+                  }
+                });
+              }
+            } else {
+              resultHtml += '❌ No face detected in the image. Please upload a clear photo of your face for analysis.';
+            }
+            
+            addMessage(resultHtml, false);
+          }
+        } else {
+          addMessage('😔 Sorry, I had trouble analyzing your photo. Please try uploading a clear image of your face.', false);
+        }
+      } catch (error) {
+        removeTypingIndicator();
+        addMessage('🔧 Sorry, there was an error analyzing your photo. Please try again.', false);
+      }
     }
 
     // Event listeners
@@ -281,7 +392,19 @@ window.SkinCoach = (function() {
     });
     
     photoBtn.addEventListener('click', () => photoInput.click());
-    photoInput.addEventListener('change', analyzePhoto);
+    photoInput.addEventListener('change', () => {
+      const file = photoInput.files[0];
+      if (file) {
+        processImageFile(file);
+        photoInput.value = ''; // Clear the input
+      }
+    });
+    
+    // Initialize drag and drop
+    setupDragAndDrop();
+    
+    // Add welcome message
+    addMessage('👋 Hi! I\'m your AI skincare assistant. You can:<br>• Ask me skincare questions<br>• Upload a photo for skin analysis<br>• Drag & drop images directly here<br><br>How can I help you today?', false);
   }
 
   // Public API
