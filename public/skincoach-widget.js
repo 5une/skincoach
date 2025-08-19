@@ -12,7 +12,7 @@ window.SkinCoach = (function() {
 
   // API methods
   const api = {
-    // Send a chat message about skin concerns
+    // Send a chat message about skin concerns (text only)
     async sendMessage(message) {
       try {
         const response = await fetch(`${config.apiBaseUrl}/chat/message`, {
@@ -30,13 +30,16 @@ window.SkinCoach = (function() {
       }
     },
 
-    // Analyze a photo
-    async analyzePhoto(photoFile) {
+    // Analyze a photo with optional message
+    async analyzePhoto(photoFile, message = null) {
       try {
         const formData = new FormData();
         formData.append('photo', photoFile);
+        if (message) {
+          formData.append('message', message);
+        }
         
-        const response = await fetch(`${config.apiBaseUrl}/chat/analyze_photo`, {
+        const response = await fetch(`${config.apiBaseUrl}/chat/message`, {
           method: 'POST',
           body: formData
         });
@@ -44,6 +47,25 @@ window.SkinCoach = (function() {
         return await response.json();
       } catch (error) {
         console.error('SkinCoach Photo Analysis Error:', error);
+        throw error;
+      }
+    },
+
+    // Send message with photo (combined endpoint)
+    async sendMessageWithPhoto(message, photoFile) {
+      try {
+        const formData = new FormData();
+        if (message) formData.append('message', message);
+        if (photoFile) formData.append('photo', photoFile);
+        
+        const response = await fetch(`${config.apiBaseUrl}/chat/message`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        return await response.json();
+      } catch (error) {
+        console.error('SkinCoach Message with Photo Error:', error);
         throw error;
       }
     },

@@ -5,22 +5,34 @@ class Api::V1::ChatController < ApplicationController
   # Enable CORS for widget usage
   before_action :set_cors_headers
   
-  # Handle chat messages about skin concerns
+  # Handle chat messages about skin concerns (text and/or photo)
   def message
     message_text = params[:message]
+    photo = params[:photo]
     
-    if message_text.blank?
-      render json: { error: "Message cannot be empty" }, status: :bad_request
+    # At least one input is required
+    if message_text.blank? && photo.blank?
+      render json: { error: "Message or photo is required" }, status: :bad_request
       return
     end
     
     begin
       chat_service = ChatService.new
-      response = chat_service.respond_to_skin_question(message_text)
+      
+      # Handle photo analysis if photo is provided
+      if photo.present?
+        Rails.logger.info "Processing chat message with photo analysis"
+        response = chat_service.respond_with_photo_analysis(message_text, photo)
+      else
+        Rails.logger.info "Processing text-only chat message"
+        response = chat_service.respond_to_skin_question(message_text)
+      end
       
       render json: {
         status: "success",
-        response: response,
+        response: response[:message],
+        analysis: response[:analysis],
+        recommendations: response[:recommendations],
         timestamp: Time.current
       }
     rescue => e

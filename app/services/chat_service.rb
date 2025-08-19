@@ -36,14 +36,182 @@ class ChatService
 
     Rails.logger.info "Chat response generated successfully"
     
-    # Apply safety checks
-    apply_safety_checks(content)
+    # Apply safety checks and return structured response
+    message_response = apply_safety_checks(content)
+    
+    {
+      message: message_response,
+      analysis: nil,
+      recommendations: nil
+    }
   rescue => e
     Rails.logger.error "Chat service error: #{e.message}"
     raise ChatError, "Failed to generate response: #{e.message}"
   end
 
+  def respond_with_photo_analysis(message_text, photo)
+    Rails.logger.info "Processing photo analysis with optional message: #{message_text&.[](0..50)}..."
+    
+    begin
+      # Step 1: Analyze the photo using VisionAnalysisClient
+      vision_client = VisionAnalysisClient.new
+      analysis_data = vision_client.analyze_image(photo)
+      Rails.logger.info "Vision analysis completed"
+
+      # Step 2: Generate AI recommendations using AiRecommendationEngine
+      ai_engine = AiRecommendationEngine.new(analysis_data)
+      recommendations_data = ai_engine.generate_recommendations
+      Rails.logger.info "AI recommendations generated"
+
+      # Step 3: Generate conversational response based on analysis and message
+      conversation_response = generate_analysis_response(analysis_data, recommendations_data, message_text)
+      Rails.logger.info "Conversational response generated"
+
+      {
+        message: conversation_response,
+        analysis: analysis_data,
+        recommendations: recommendations_data
+      }
+    rescue VisionAnalysisClient::AnalysisError, AiRecommendationEngine::RecommendationError => e
+      Rails.logger.error "Analysis service error: #{e.message}"
+      raise ChatError, "Photo analysis failed: #{e.message}"
+    rescue => e
+      Rails.logger.error "Photo analysis error: #{e.message}"
+      raise ChatError, "Failed to analyze photo: #{e.message}"
+    end
+  end
+
   private
+
+  def generate_analysis_response(analysis_data, recommendations_data, user_message)
+    # Build context from analysis results
+    context = build_analysis_context(analysis_data, recommendations_data)
+    
+    # Create prompt that includes analysis context
+    prompt = build_analysis_response_prompt(context, user_message)
+    
+    # Generate conversational response
+    response = @client.chat(
+      parameters: {
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: analysis_system_prompt
+          },
+          {
+            role: "user", 
+            content: prompt
+          }
+        ],
+        max_tokens: 600,
+        temperature: 0.3
+      }
+    )
+
+    content = response.dig("choices", 0, "message", "content")
+    raise ChatError, "No analysis response content received" if content.blank?
+
+    apply_safety_checks(content)
+  end
+
+  def build_analysis_context(analysis_data, recommendations_data)
+    face_detected = analysis_data["face_detected"]
+    skin_type = analysis_data["skin_type"]
+    concerns = Array(analysis_data["concerns"])
+    severity = analysis_data["severity"] || {}
+    notes = analysis_data["notes"]
+    
+    # Extract top recommendations by category
+    top_products = {}
+    recommendations_data[:picks]&.each do |category, products|
+      top_products[category] = products.first if products.any?
+    end
+    
+    {
+      face_detected: face_detected,
+      skin_type: skin_type,
+      concerns: concerns,
+      severity: severity,
+      notes: notes,
+      recommendations: top_products,
+      rationale: recommendations_data[:rationale]
+    }
+  end
+
+  def build_analysis_response_prompt(context, user_message)
+    prompt = "Based on the skin analysis results:\n\n"
+    
+    if context[:face_detected]
+      prompt += "SKIN ANALYSIS:\n"
+      prompt += "- Skin Type: #{context[:skin_type]}\n"
+      
+      if context[:concerns].any?
+        concerns_with_severity = context[:concerns].map do |concern|
+          severity = context[:severity][concern] || "mild"
+          "#{concern} (#{severity})"
+        end
+        prompt += "- Concerns: #{concerns_with_severity.join(', ')}\n"
+      else
+        prompt += "- Concerns: None detected\n"
+      end
+      
+      prompt += "- Notes: #{context[:notes]}\n\n"
+      
+      if context[:recommendations].any?
+        prompt += "TOP PRODUCT RECOMMENDATIONS:\n"
+        context[:recommendations].each do |category, product|
+          prompt += "- #{category.humanize}: #{product['brand']} #{product['name']}\n"
+        end
+        prompt += "\n"
+      end
+      
+      if context[:rationale].present?
+        prompt += "RECOMMENDATION RATIONALE:\n#{context[:rationale]}\n\n"
+      end
+    else
+      prompt += "No facial skin was detected in the uploaded image. "
+      prompt += "Please upload a clear photo of your face for skin analysis.\n\n"
+    end
+    
+    if user_message.present?
+      prompt += "USER QUESTION: #{user_message}\n\n"
+      prompt += "Please provide a helpful response that addresses their question while incorporating the skin analysis results above."
+    else
+      prompt += "Please provide a friendly summary of the skin analysis and personalized skincare advice based on the results."
+    end
+    
+    prompt
+  end
+
+  def analysis_system_prompt
+    <<~PROMPT
+      You are a helpful skincare assistant providing personalized advice based on skin analysis results. Your role is to:
+
+      1. Explain skin analysis results in a friendly, conversational way
+      2. Connect the analysis to practical skincare advice
+      3. Highlight relevant product recommendations and explain why they're suitable
+      4. Answer any specific questions the user has about their skin or skincare
+      5. Provide encouraging and supportive guidance
+
+      GUIDELINES:
+      - Be conversational and friendly, not clinical
+      - Focus on practical skincare tips and product usage
+      - Explain why certain products are recommended for their specific skin type/concerns
+      - If no face was detected, guide them on how to take a better photo
+      - Always emphasize that this is for cosmetic skincare purposes
+      - Recommend professional consultation for serious concerns
+      - Keep responses concise but informative (under 500 words)
+
+      SAFETY RULES:
+      - This is cosmetic skincare advice, not medical diagnosis
+      - Never diagnose medical conditions
+      - Always suggest dermatologist consultation for concerning symptoms
+      - Focus on general skincare education and product guidance
+
+      Respond in a warm, helpful tone as if you're a knowledgeable friend giving skincare advice.
+    PROMPT
+  end
 
   def system_prompt
     <<~PROMPT

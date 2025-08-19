@@ -42,7 +42,6 @@ Rails.application.routes.draw do
 
   # Shop routes
   resources :shop, only: [:index]
-  get "shop", to: "shop#index", as: :shop_index
 
   # Defines the root path route ("/")
   root "shop#index"
