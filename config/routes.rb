@@ -40,6 +40,10 @@ Rails.application.routes.draw do
     end
   end
 
+  # Shop routes
+  resources :shop, only: [:index]
+  get "shop", to: "shop#index", as: :shop_index
+
   # Defines the root path route ("/")
-  root "consultations#new"
+  root "shop#index"
 end
