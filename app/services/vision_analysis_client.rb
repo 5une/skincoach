@@ -51,8 +51,8 @@ class VisionAnalysisClient
                 ]
               }
             ],
-            max_tokens: 1000,
-            temperature: 0.1
+            max_tokens: 800,
+            temperature: 0
           }
         )
 
@@ -160,84 +160,40 @@ class VisionAnalysisClient
   end
 
   def system_prompt
-    # Generic image analysis for product recommendations
     <<~PROMPT
-      You are a helpful assistant that analyzes photos to provide product recommendations. You look at images and identify visual characteristics to help with product selection.
-
-      Your role is to:
-      - Observe visual characteristics in photos
-      - Provide neutral, factual descriptions
-      - Help with product recommendation based on observations
-      - Focus on appearance for cosmetic product selection
-
-      Always respond with only the requested JSON format. Be objective and descriptive.
+      Analyze photos for cosmetic product recommendations. Observe visual characteristics and provide neutral descriptions in JSON format only.
     PROMPT
   end
 
   def user_prompt
-    # Simple image analysis for product recommendations
     <<~PROMPT
-      Analyze this image and describe the facial characteristics to help with cosmetic product selection. Return JSON in this format:
+      Analyze facial skin for product recommendations. Return JSON:
 
       {
         "face_detected": true | false,
         "skin_type": "dry" | "oily" | "combination" | "normal" | "unknown",
         "concerns": ["acne", "redness", "dryness", "oiliness", "hyperpigmentation", "sensitivity"],
-        "severity": {
-          "concern_name": "mild" | "moderate" | "noticeable"
-        },
-        "notes": "Brief appearance description for product recommendations"
+        "severity": { "concern_name": "mild" | "moderate" | "noticeable" },
+        "notes": "Brief skin description"
       }
 
-      IMPORTANT: First determine if this image shows a human face:
-      - If you can see a clear human face with visible facial skin, set "face_detected": true
-      - If this is not a face, or shows objects/animals/landscapes/etc., set "face_detected": false
-      - Only analyze skin characteristics if face_detected is true
-
-      If face_detected is true:
-      - Identify the apparent skin type from the options
-      - Note any visible characteristics from the concern list
-      - Rate visibility levels as mild, moderate, or noticeable
-      - Write brief notes about facial skin for product matching
-
-      If face_detected is false:
-      - Set skin_type to "unknown"
-      - Set concerns to empty array []
-      - Set severity to empty object {}
-      - Write a note explaining this is not a facial image
-
-      This is for cosmetic product recommendations. Return only the JSON.
+      If no face detected: set face_detected=false, skin_type="unknown", concerns=[], severity={}, notes explaining why.
+      If face detected: analyze skin type, concerns, and severity levels. Return only JSON.
     PROMPT
   end
 
   def fallback_system_prompt
-    # Ultra-generic image analysis
     <<~PROMPT
-      You are an assistant that describes images. Look at photos and provide factual descriptions in JSON format.
-      Be helpful and descriptive about what you observe.
+      Describe images in JSON format. Be factual and helpful.
     PROMPT
   end
 
   def fallback_user_prompt
-    # Very generic image description request
     <<~PROMPT
-      Describe this photo using the following JSON structure for categorization purposes:
-
-      {
-        "face_detected": true | false,
-        "skin_type": "dry" | "oily" | "combination" | "normal" | "unknown",
-        "concerns": ["acne", "redness", "dryness", "oiliness", "hyperpigmentation", "sensitivity"],
-        "severity": {
-          "concern_name": "mild" | "moderate" | "noticeable"
-        },
-        "notes": "Description of what you see in the image"
-      }
-
-      First determine if you can see a human face in this image:
-      - If yes, set face_detected to true and analyze the facial skin
-      - If no, set face_detected to false and set other fields to defaults (skin_type: "unknown", concerns: [], severity: {})
-
-      Just describe what you observe in the photo using these categories. Return only JSON.
+      Describe photo in JSON format:
+      {"face_detected": true|false, "skin_type": "dry|oily|combination|normal|unknown", "concerns": [], "severity": {}, "notes": "description"}
+      
+      If face visible: analyze skin. If no face: set face_detected=false, other fields to defaults. Return JSON only.
     PROMPT
   end
 

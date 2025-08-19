@@ -99,6 +99,36 @@ window.SkinCoach = (function() {
     }
   };
 
+  // Markdown rendering utility
+  const markdown = {
+    // Simple markdown to HTML converter
+    render(text) {
+      return text
+        // Bold: **text** or __text__
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.*?)__/g, '<strong>$1</strong>')
+        // Italic: *text* or _text_
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/_(.*?)_/g, '<em>$1</em>')
+        // Code: `code`
+        .replace(/`(.*?)`/g, '<code style="background:#f5f5f5;padding:2px 4px;border-radius:3px;font-family:monospace;">$1</code>')
+        // Code blocks: ```code```
+        .replace(/```([\s\S]*?)```/g, '<pre style="background:#f5f5f5;padding:8px;border-radius:4px;overflow-x:auto;margin:8px 0;"><code style="font-family:monospace;">$1</code></pre>')
+        // Links: [text](url)
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#667eea;text-decoration:underline;">$1</a>')
+        // Line breaks
+        .replace(/\n/g, '<br>')
+        // Lists: - item or * item
+        .replace(/^[\s]*[-*]\s(.+)$/gm, '<li style="margin-left:20px;">$1</li>')
+        // Wrap consecutive list items
+        .replace(/(<li[^>]*>.*<\/li>\s*)+/g, '<ul style="margin:8px 0;padding-left:0;">$&</ul>')
+        // Headers: # Header, ## Header, ### Header
+        .replace(/^### (.*$)/gm, '<h3 style="font-size:16px;font-weight:600;margin:12px 0 6px 0;">$1</h3>')
+        .replace(/^## (.*$)/gm, '<h2 style="font-size:18px;font-weight:600;margin:12px 0 6px 0;">$1</h2>')
+        .replace(/^# (.*$)/gm, '<h1 style="font-size:20px;font-weight:600;margin:12px 0 6px 0;">$1</h1>');
+    }
+  };
+
   // Chat history management
   const chatHistory = {
     // Save chat message to localStorage
@@ -299,8 +329,8 @@ window.SkinCoach = (function() {
         }
       }
       
-      // Add text content
-      messageContent += content;
+      // Add text content (render markdown for bot messages)
+      messageContent += isUser ? content : markdown.render(content);
       
       messageDiv.innerHTML = messageContent;
       messages.appendChild(messageDiv);
@@ -343,8 +373,8 @@ window.SkinCoach = (function() {
         `;
       }
       
-      // Add text content
-      messageContent += messageData.content;
+      // Add text content (render markdown for bot messages)
+      messageContent += messageData.isUser ? messageData.content : markdown.render(messageData.content);
       
       messageDiv.innerHTML = messageContent;
       messages.appendChild(messageDiv);
