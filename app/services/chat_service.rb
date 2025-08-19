@@ -11,6 +11,12 @@ class ChatService
   def respond_to_skin_question(message)
     Rails.logger.info "Processing skin question: #{message[0..100]}..."
     
+    # Check if user is asking for product recommendations
+    if asking_for_product_recommendations?(message)
+      Rails.logger.info "Detected product recommendation request"
+      return respond_with_product_recommendations(message)
+    end
+    
     # Build the chat completion request
     response = @client.chat(
       parameters: {
@@ -82,6 +88,193 @@ class ChatService
   end
 
   private
+
+  def asking_for_product_recommendations?(message)
+    message_lower = message.downcase
+    
+    # Check for product recommendation keywords
+    recommendation_keywords = [
+      'recommend', 'suggest', 'what should i use', 'what to use', 'what can i use',
+      'best product', 'good product', 'help me find', 'what product',
+      'for acne', 'for dry skin', 'for oily skin', 'for sensitive skin',
+      'for redness', 'for hyperpigmentation', 'for wrinkles', 'for aging'
+    ]
+    
+    recommendation_keywords.any? { |keyword| message_lower.include?(keyword) }
+  end
+  
+  def respond_with_product_recommendations(message)
+    Rails.logger.info "Generating product recommendations for query: #{message}"
+    
+    # Extract skin concerns and product types from the message
+    concerns = extract_skin_concerns(message)
+    categories = extract_product_categories(message)
+    
+    # Query products from database
+    products = find_relevant_products(concerns, categories)
+    
+    if products.any?
+      # Generate AI response with product recommendations
+      generate_product_recommendation_response(message, products)
+    else
+      # Fallback response when no products found
+      {
+        message: "I'd love to help you find the right products! Could you be more specific about your skin concerns or the type of product you're looking for? For example, you could ask about cleansers for acne-prone skin or moisturizers for dry skin.",
+        analysis: nil,
+        recommendations: nil
+      }
+    end
+  end
+  
+  def extract_skin_concerns(message)
+    message_lower = message.downcase
+    concerns = []
+    
+    # Map keywords to database skin concerns
+    concern_mapping = {
+      'acne' => 'acne',
+      'pimple' => 'acne',
+      'breakout' => 'acne',
+      'zit' => 'acne',
+      'dry' => 'dryness',
+      'dehydrated' => 'dryness',
+      'flaky' => 'dryness',
+      'oily' => 'oiliness',
+      'greasy' => 'oiliness',
+      'shiny' => 'oiliness',
+      'red' => 'redness',
+      'irritated' => 'redness',
+      'inflamed' => 'redness',
+      'sensitive' => 'sensitivity',
+      'reactive' => 'sensitivity',
+      'dark spot' => 'hyperpigmentation',
+      'pigmentation' => 'hyperpigmentation',
+      'discoloration' => 'hyperpigmentation'
+    }
+    
+    concern_mapping.each do |keyword, concern|
+      concerns << concern if message_lower.include?(keyword)
+    end
+    
+    concerns.uniq
+  end
+  
+  def extract_product_categories(message)
+    message_lower = message.downcase
+    categories = []
+    
+    # Map keywords to database categories
+    category_mapping = {
+      'cleanser' => 'cleanser',
+      'cleansing' => 'cleanser',
+      'wash' => 'cleanser',
+      'face wash' => 'cleanser',
+      'serum' => 'serum',
+      'treatment' => 'serum',
+      'moisturizer' => 'moisturizer',
+      'moisturiser' => 'moisturizer',
+      'cream' => 'moisturizer',
+      'lotion' => 'moisturizer',
+      'sunscreen' => 'sunscreen',
+      'spf' => 'sunscreen',
+      'sun protection' => 'sunscreen',
+      'spot treatment' => 'spot_treatment'
+    }
+    
+    category_mapping.each do |keyword, category|
+      categories << category if message_lower.include?(keyword)
+    end
+    
+    categories.uniq
+  end
+  
+  def find_relevant_products(concerns, categories)
+    products = Product.all
+    
+    # Filter by categories if specified
+    if categories.any?
+      products = products.where(category: categories)
+    end
+    
+    # Filter by concerns if specified
+    if concerns.any?
+      concern_query = concerns.map { |c| "skin_concerns ILIKE ?" }.join(" OR ")
+      concern_values = concerns.map { |c| "%#{c}%" }
+      products = products.where(concern_query, *concern_values)
+    end
+    
+    # Limit results and order by name
+    products.limit(6).order(:category, :name)
+  end
+  
+  def generate_product_recommendation_response(message, products)
+    # Group products by category for better organization
+    products_by_category = products.group_by(&:category)
+    
+    # Build context for AI
+    context = build_product_context(products_by_category)
+    prompt = build_product_recommendation_prompt(message, context)
+    
+    # Generate AI response
+    response = @client.chat(
+      parameters: {
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: product_recommendation_system_prompt },
+          { role: "user", content: prompt }
+        ],
+        max_tokens: 500,
+        temperature: 0.1
+      }
+    )
+    
+    content = response.dig("choices", 0, "message", "content")
+    raise ChatError, "No product recommendation response received" if content.blank?
+    
+    message_response = apply_safety_checks(content)
+    
+    {
+      message: message_response,
+      analysis: nil,
+      recommendations: { picks: products_by_category }
+    }
+  end
+  
+  def build_product_context(products_by_category)
+    context = "AVAILABLE PRODUCTS FROM OUR DATABASE:\n\n"
+    
+    products_by_category.each do |category, products|
+      context += "#{category.upcase.tr('_', ' ')}:\n"
+      products.each do |product|
+        context += "- [#{product.brand} #{product.name}](#{product.product_url})"
+        context += " - $#{product.price}" if product.price.present?
+        context += " - For: #{product.skin_concerns}" if product.skin_concerns.present?
+        context += " - Ingredients: #{product.key_ingredients}" if product.key_ingredients.present?
+        context += "\n"
+      end
+      context += "\n"
+    end
+    
+    context
+  end
+  
+  def build_product_recommendation_prompt(message, context)
+    <<~PROMPT
+      USER QUESTION: #{message}
+
+      #{context}
+
+      Please provide a helpful response that recommends the most suitable products from the list above. Use the exact product names and URLs provided. Focus on products that best match the user's specific needs mentioned in their question. Explain why each product is suitable for their concerns.
+
+      IMPORTANT: Only recommend products from the list above. Use markdown links [Product Name](url) for all product mentions.
+    PROMPT
+  end
+  
+  def product_recommendation_system_prompt
+    <<~PROMPT
+      You are a helpful skincare assistant providing product recommendations from a curated database. When users ask for product suggestions, recommend only products from the provided list with their exact names and URLs. Explain why each product is suitable for their specific skin concerns. Use markdown format [Product Name](url) for all product mentions. Be friendly and helpful while focusing on cosmetic skincare advice only.
+    PROMPT
+  end
 
   def generate_analysis_response(analysis_data, recommendations_data, user_message)
     # Build context from analysis results
