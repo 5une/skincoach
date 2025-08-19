@@ -7,7 +7,8 @@ window.SkinCoach = (function() {
   // Configuration
   const config = {
     apiBaseUrl: window.location.origin + '/api/v1',
-    widgetId: 'skincoach-widget'
+    widgetId: 'skincoach-widget',
+    storageKey: 'skincoach-chat-history'
   };
 
   // API methods
@@ -98,6 +99,64 @@ window.SkinCoach = (function() {
     }
   };
 
+  // Chat history management
+  const chatHistory = {
+    // Save chat message to localStorage
+    saveMessage(message, isUser, imageData = null) {
+      try {
+        const history = this.getHistory();
+        const messageData = {
+          id: Date.now() + Math.random(), // Unique ID
+          content: message,
+          isUser: isUser,
+          timestamp: new Date().toISOString(),
+          imageData: imageData // Base64 image data if present
+        };
+        
+        history.push(messageData);
+        
+        // Keep only last 50 messages to prevent localStorage bloat
+        if (history.length > 50) {
+          history.splice(0, history.length - 50);
+        }
+        
+        localStorage.setItem(config.storageKey, JSON.stringify(history));
+      } catch (error) {
+        console.warn('Failed to save chat message:', error);
+      }
+    },
+
+    // Get chat history from localStorage
+    getHistory() {
+      try {
+        const stored = localStorage.getItem(config.storageKey);
+        return stored ? JSON.parse(stored) : [];
+      } catch (error) {
+        console.warn('Failed to load chat history:', error);
+        return [];
+      }
+    },
+
+    // Clear chat history
+    clearHistory() {
+      try {
+        localStorage.removeItem(config.storageKey);
+      } catch (error) {
+        console.warn('Failed to clear chat history:', error);
+      }
+    },
+
+    // Convert image file to base64 for storage
+    async imageToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
   // Widget UI creation
   function createWidget() {
     const widget = document.createElement('div');
@@ -123,8 +182,21 @@ window.SkinCoach = (function() {
           padding: 16px;
           border-radius: 12px 12px 0 0;
           font-weight: 600;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         ">
-          🧴 SkinCoach Assistant
+          <span>🧴 SkinCoach Assistant</span>
+          <button id="skincoach-clear" style="
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.8;
+          " title="Clear chat history">🗑️</button>
         </div>
         
         <div id="skincoach-messages" style="
@@ -133,9 +205,6 @@ window.SkinCoach = (function() {
           overflow-y: auto;
           background: #f8f9fa;
         ">
-          <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-            Hi! I'm your skincare assistant. Ask me about skin concerns or upload a photo for analysis.
-          </div>
         </div>
         
         <div style="padding: 16px; background: white; border-radius: 0 0 12px 12px;">
@@ -189,7 +258,7 @@ window.SkinCoach = (function() {
     const photoBtn = document.getElementById('skincoach-photo-btn');
 
     // Add message to chat
-    function addMessage(content, isUser = false, imageFile = null) {
+    async function addMessage(content, isUser = false, imageFile = null, skipSave = false) {
       const messageDiv = document.createElement('div');
       messageDiv.style.cssText = `
         background: ${isUser ? '#667eea' : 'white'};
@@ -203,6 +272,7 @@ window.SkinCoach = (function() {
       `;
       
       let messageContent = '';
+      let imageData = null;
       
       // Add image if provided
       if (imageFile) {
@@ -218,6 +288,15 @@ window.SkinCoach = (function() {
             ">
           </div>
         `;
+        
+        // Convert to base64 for storage if not skipping save
+        if (!skipSave) {
+          try {
+            imageData = await chatHistory.imageToBase64(imageFile);
+          } catch (error) {
+            console.warn('Failed to convert image to base64:', error);
+          }
+        }
       }
       
       // Add text content
@@ -226,6 +305,75 @@ window.SkinCoach = (function() {
       messageDiv.innerHTML = messageContent;
       messages.appendChild(messageDiv);
       messages.scrollTop = messages.scrollHeight;
+      
+      // Save to localStorage unless explicitly skipping
+      if (!skipSave) {
+        chatHistory.saveMessage(content, isUser, imageData);
+      }
+    }
+
+    // Add message from stored data (for restoration)
+    function addStoredMessage(messageData) {
+      const messageDiv = document.createElement('div');
+      messageDiv.style.cssText = `
+        background: ${messageData.isUser ? '#667eea' : 'white'};
+        color: ${messageData.isUser ? 'white' : '#333'};
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        max-width: 85%;
+        ${messageData.isUser ? 'margin-left: auto;' : ''}
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      `;
+      
+      let messageContent = '';
+      
+      // Add image if stored
+      if (messageData.imageData) {
+        messageContent += `
+          <div style="margin-bottom: 8px;">
+            <img src="${messageData.imageData}" alt="Uploaded skin photo" style="
+              max-width: 200px;
+              max-height: 200px;
+              border-radius: 8px;
+              object-fit: cover;
+              border: 2px solid ${messageData.isUser ? 'rgba(255,255,255,0.3)' : '#e0e0e0'};
+            ">
+          </div>
+        `;
+      }
+      
+      // Add text content
+      messageContent += messageData.content;
+      
+      messageDiv.innerHTML = messageContent;
+      messages.appendChild(messageDiv);
+    }
+
+    // Restore chat history from localStorage
+    function restoreChatHistory() {
+      const history = chatHistory.getHistory();
+      
+      if (history.length === 0) {
+        // Add welcome message if no history
+        addMessage('👋 Hi! I\'m your AI skincare assistant. You can:<br>• Ask me skincare questions<br>• Upload a photo for skin analysis<br>• Drag & drop images directly here<br><br>How can I help you today?', false, null, true);
+      } else {
+        // Restore all messages from history
+        history.forEach(messageData => {
+          addStoredMessage(messageData);
+        });
+      }
+      
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Clear chat history
+    function clearChat() {
+      if (confirm('Are you sure you want to clear your chat history? This cannot be undone.')) {
+        chatHistory.clearHistory();
+        messages.innerHTML = '';
+        addMessage('👋 Chat cleared! How can I help you today?', false, null, true);
+      }
     }
 
     // Add typing indicator
@@ -261,7 +409,7 @@ window.SkinCoach = (function() {
       const message = input.value.trim();
       if (!message) return;
       
-      addMessage(message, true);
+      await addMessage(message, true);
       input.value = '';
       
       try {
@@ -271,13 +419,13 @@ window.SkinCoach = (function() {
         removeTypingIndicator();
         
         if (response.status === 'success') {
-          addMessage(response.response, false);
+          await addMessage(response.response, false);
         } else {
-          addMessage('Sorry, I had trouble understanding that. Please try again.', false);
+          await addMessage('Sorry, I had trouble understanding that. Please try again.', false);
         }
       } catch (error) {
         removeTypingIndicator();
-        addMessage('Sorry, there was an error processing your message.', false);
+        await addMessage('Sorry, there was an error processing your message.', false);
       }
     }
 
@@ -324,7 +472,7 @@ window.SkinCoach = (function() {
             // Process the dropped image
             processImageFile(file);
           } else {
-            addMessage('❌ Please drop an image file (JPEG, PNG, etc.)', false);
+            addMessage('❌ Please drop an image file (JPEG, PNG, etc.)', false, null, true);
           }
         }
       }
@@ -333,7 +481,7 @@ window.SkinCoach = (function() {
     // Process image file (from drag/drop or file input)
     async function processImageFile(file) {
       // Show uploaded image with a message
-      addMessage('📸 Analyzing your skin photo...', true, file);
+      await addMessage('📸 Analyzing your skin photo...', true, file);
       
       try {
         const typingIndicator = addTypingIndicator();
@@ -344,7 +492,7 @@ window.SkinCoach = (function() {
         if (response.status === 'success') {
           // Use the conversational response from the AI
           if (response.response) {
-            addMessage(response.response, false);
+            await addMessage(response.response, false);
           } else {
             // Fallback to structured display if no conversational response
             const analysis = response.analysis;
@@ -374,14 +522,14 @@ window.SkinCoach = (function() {
               resultHtml += '❌ No face detected in the image. Please upload a clear photo of your face for analysis.';
             }
             
-            addMessage(resultHtml, false);
+            await addMessage(resultHtml, false);
           }
         } else {
-          addMessage('😔 Sorry, I had trouble analyzing your photo. Please try uploading a clear image of your face.', false);
+          await addMessage('😔 Sorry, I had trouble analyzing your photo. Please try uploading a clear image of your face.', false);
         }
       } catch (error) {
         removeTypingIndicator();
-        addMessage('🔧 Sorry, there was an error analyzing your photo. Please try again.', false);
+        await addMessage('🔧 Sorry, there was an error analyzing your photo. Please try again.', false);
       }
     }
 
@@ -400,11 +548,15 @@ window.SkinCoach = (function() {
       }
     });
     
+    // Clear chat button
+    const clearBtn = document.getElementById('skincoach-clear');
+    clearBtn.addEventListener('click', clearChat);
+    
     // Initialize drag and drop
     setupDragAndDrop();
     
-    // Add welcome message
-    addMessage('👋 Hi! I\'m your AI skincare assistant. You can:<br>• Ask me skincare questions<br>• Upload a photo for skin analysis<br>• Drag & drop images directly here<br><br>How can I help you today?', false);
+    // Restore chat history or show welcome message
+    restoreChatHistory();
   }
 
   // Public API
