@@ -544,7 +544,14 @@ window.SkinCoach = (function() {
                 Object.entries(recommendations.picks).forEach(([category, products]) => {
                   if (products && products.length > 0) {
                     const product = products[0]; // Show first product
-                    resultHtml += `<strong>${category.charAt(0).toUpperCase() + category.slice(1)}:</strong> ${product.brand} ${product.name}<br>`;
+                    const productTitle = `${product.brand} ${product.name}`;
+                    const categoryTitle = category.charAt(0).toUpperCase() + category.slice(1);
+                    
+                    if (product.url) {
+                      resultHtml += `<strong>${categoryTitle}:</strong> <a href="${product.url}" target="_blank" style="color:#667eea;text-decoration:underline;">${productTitle}</a><br>`;
+                    } else {
+                      resultHtml += `<strong>${categoryTitle}:</strong> ${productTitle}<br>`;
+                    }
                   }
                 });
               }

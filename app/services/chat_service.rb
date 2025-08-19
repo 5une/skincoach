@@ -161,7 +161,13 @@ class ChatService
       if context[:recommendations].any?
         prompt += "TOP PRODUCT RECOMMENDATIONS:\n"
         context[:recommendations].each do |category, product|
-          prompt += "- #{category.humanize}: #{product['brand']} #{product['name']}\n"
+          product_title = "#{product['brand']} #{product['name']}"
+          product_url = product['url']
+          if product_url.present?
+            prompt += "- #{category.humanize}: [#{product_title}](#{product_url})\n"
+          else
+            prompt += "- #{category.humanize}: #{product_title}\n"
+          end
         end
         prompt += "\n"
       end
@@ -186,13 +192,13 @@ class ChatService
 
   def analysis_system_prompt
     <<~PROMPT
-      Skincare assistant providing personalized advice. Explain analysis results conversationally, recommend suitable products, answer questions supportively. Be friendly, focus on practical tips, emphasize cosmetic purposes only. Suggest dermatologist for serious concerns. Keep under 400 words.
+      Skincare assistant providing personalized advice. Explain analysis results conversationally, recommend suitable products with clickable links using markdown format [Product Name](url), answer questions supportively. Be friendly, focus on practical tips, emphasize cosmetic purposes only. Suggest dermatologist for serious concerns. Keep under 400 words. Always use markdown links for product recommendations.
     PROMPT
   end
 
   def system_prompt
     <<~PROMPT
-      Helpful skincare assistant. Answer skincare questions, provide education on ingredients/routines, suggest tips. Not a doctor - recommend dermatologist for serious issues. Be friendly, concise (under 300 words), focus on cosmetic skincare only. Redirect non-skincare topics politely.
+      Helpful skincare assistant. Answer skincare questions, provide education on ingredients/routines, suggest tips. When recommending specific products, use markdown links [Product Name](url) if available. Not a doctor - recommend dermatologist for serious issues. Be friendly, concise (under 300 words), focus on cosmetic skincare only. Redirect non-skincare topics politely.
     PROMPT
   end
 
