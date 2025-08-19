@@ -182,9 +182,9 @@ class ChatService
     
     if user_message.present?
       prompt += "USER QUESTION: #{user_message}\n\n"
-      prompt += "Please provide a helpful response that addresses their question while incorporating the skin analysis results above."
+      prompt += "Please provide a helpful response that addresses their question while incorporating the skin analysis results above. IMPORTANT: Only mention products from the TOP PRODUCT RECOMMENDATIONS list above. Do not suggest any other products."
     else
-      prompt += "Please provide a friendly summary of the skin analysis and personalized skincare advice based on the results."
+      prompt += "Please provide a friendly summary of the skin analysis and personalized skincare advice based on the results. IMPORTANT: Only mention products from the TOP PRODUCT RECOMMENDATIONS list above. Do not suggest any other products."
     end
     
     prompt
@@ -192,13 +192,13 @@ class ChatService
 
   def analysis_system_prompt
     <<~PROMPT
-      Skincare assistant providing personalized advice. Explain analysis results conversationally, recommend suitable products with clickable links using markdown format [Product Name](url), answer questions supportively. Be friendly, focus on practical tips, emphasize cosmetic purposes only. Suggest dermatologist for serious concerns. Keep under 400 words. Always use markdown links for product recommendations.
+      Skincare assistant providing personalized advice. Explain analysis results conversationally, ONLY recommend products from the provided product list with their exact URLs. Use markdown format [Product Name](url) only for products in the recommendations list. Never suggest products not in the provided list. Be friendly, focus on practical tips, emphasize cosmetic purposes only. Suggest dermatologist for serious concerns. Keep under 400 words.
     PROMPT
   end
 
   def system_prompt
     <<~PROMPT
-      Helpful skincare assistant. Answer skincare questions, provide education on ingredients/routines, suggest tips. When recommending specific products, use markdown links [Product Name](url) if available. Not a doctor - recommend dermatologist for serious issues. Be friendly, concise (under 300 words), focus on cosmetic skincare only. Redirect non-skincare topics politely.
+      Helpful skincare assistant. Answer skincare questions, provide education on ingredients/routines, suggest general tips. Focus on ingredient types and skincare principles rather than specific branded products. Not a doctor - recommend dermatologist for serious issues. Be friendly, concise (under 300 words), focus on cosmetic skincare only. Redirect non-skincare topics politely.
     PROMPT
   end
 
