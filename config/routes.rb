@@ -20,6 +20,26 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
+  # API routes for JavaScript widget
+  namespace :api do
+    namespace :v1 do
+      # Chat endpoint for skin-related questions
+      post 'chat/message', to: 'chat#message'
+      
+      # Photo analysis endpoint
+      post 'chat/analyze_photo', to: 'chat#analyze_photo'
+      
+      # Get consultation status and results
+      get 'chat/consultation/:id', to: 'chat#consultation_status'
+      
+      # Get product recommendations
+      get 'chat/products', to: 'chat#products'
+      
+      # Handle preflight OPTIONS requests for CORS
+      match '*path', to: 'chat#options', via: :options
+    end
+  end
+
   # Defines the root path route ("/")
   root "consultations#new"
 end
