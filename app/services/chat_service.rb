@@ -182,9 +182,17 @@ class ChatService
     
     if user_message.present?
       prompt += "USER QUESTION: #{user_message}\n\n"
-      prompt += "Please provide a helpful response that addresses their question while incorporating the skin analysis results above. IMPORTANT: Only mention products from the TOP PRODUCT RECOMMENDATIONS list above. Do not suggest any other products."
+      if context[:face_detected]
+        prompt += "Please provide a helpful response that addresses their question while incorporating the skin analysis results above. IMPORTANT: Only mention products from the TOP PRODUCT RECOMMENDATIONS list above. Do not suggest any other products."
+      else
+        prompt += "Since no facial skin was detected, do not provide any skincare product recommendations or skincare techniques. Simply explain that a clear face photo is needed for skin analysis and product recommendations. Be helpful but do not suggest any skincare products or routines."
+      end
     else
-      prompt += "Please provide a friendly summary of the skin analysis and personalized skincare advice based on the results. IMPORTANT: Only mention products from the TOP PRODUCT RECOMMENDATIONS list above. Do not suggest any other products."
+      if context[:face_detected]
+        prompt += "Please provide a friendly summary of the skin analysis and personalized skincare advice based on the results. IMPORTANT: Only mention products from the TOP PRODUCT RECOMMENDATIONS list above. Do not suggest any other products."
+      else
+        prompt += "Since no facial skin was detected, do not provide any skincare product recommendations or skincare techniques. Simply explain that a clear face photo is needed for analysis and encourage the user to upload a proper face photo. Be friendly but do not suggest any skincare products or routines."
+      end
     end
     
     prompt
@@ -192,7 +200,7 @@ class ChatService
 
   def analysis_system_prompt
     <<~PROMPT
-      Skincare assistant providing personalized advice. Explain analysis results conversationally, ONLY recommend products from the provided product list with their exact URLs. Use markdown format [Product Name](url) only for products in the recommendations list. Never suggest products not in the provided list. Be friendly, focus on practical tips, emphasize cosmetic purposes only. Suggest dermatologist for serious concerns. Keep under 400 words.
+      Skincare assistant providing personalized advice. When facial skin is detected, explain analysis results conversationally and ONLY recommend products from the provided product list with their exact URLs. When NO facial skin is detected, do not recommend any skincare products or techniques - only explain that a clear face photo is needed. Use markdown format [Product Name](url) only for products in the recommendations list. Never suggest products not in the provided list. Be friendly, emphasize cosmetic purposes only. Suggest dermatologist for serious concerns. Keep under 400 words.
     PROMPT
   end
 
