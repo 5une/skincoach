@@ -12,8 +12,17 @@
       height: 100vh;
     }
   </style>
+  <!-- Include SkinCoach Widget -->
+  <script src="/skincoach-widget.js"></script>
 </head>
 <body>
   <!-- The page is intentionally blank - only the chat widget will be visible -->
+  
+  <script>
+    // Initialize the widget when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      SkinCoach.init();
+    });
+  </script>
 </body>
 </html>
