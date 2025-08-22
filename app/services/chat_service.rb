@@ -416,15 +416,15 @@ class ChatService
     if user_message.present?
       prompt += "USER QUESTION: #{user_message}\n\n"
       if context[:face_detected]
-        prompt += "Respond in a warm, knowledgeable way using the skin analysis information above. Be enthusiastic about the products you recommend, explaining why each one would work well for them. Only mention products from your curated list - these are the ones you know and trust."
+        prompt += "Based on what you can see in their photo, share your observations using visual language like 'I can see' or 'looking at your photo'. Only mention skin concerns that are actually visible in the analysis data above. Be enthusiastic about the products you recommend, explaining why each one would work well for what you observe. Only mention products from your curated list."
       else
-        prompt += "Since the face isn't clearly visible, politely explain that you need a clearer photo to provide accurate recommendations. Don't suggest products without being able to properly assess their skin."
+        prompt += "Since you can't clearly see their face in the photo, politely explain that you need a clearer image to provide accurate recommendations. Don't suggest products without being able to properly see their skin."
       end
     else
       if context[:face_detected]
-        prompt += "Share your observations about their skin in an encouraging way and explain why you've selected these specific products for them. Focus only on the products from your recommended list - these are the ones you believe will be most effective for their skin type and concerns."
+        prompt += "Share what you can see in their photo using visual language like 'from looking at your photo' or 'I can see'. Only mention the specific skin type and concerns that are listed in the analysis data above - don't add concerns that aren't there. Explain why you've selected these specific products based on what you actually observe."
       else
-        prompt += "Kindly let them know the photo isn't clear enough for an accurate analysis and ask for a better image. Explain that you want to give them the best possible recommendations, which requires being able to see their skin clearly."
+        prompt += "Let them know the photo isn't clear enough for you to see their skin properly and ask for a better image. Explain that you want to give accurate recommendations based on what you can actually see."
       end
     end
     
@@ -433,15 +433,17 @@ class ChatService
 
   def analysis_system_prompt
     <<~PROMPT
-      I'm really excited to help you with your skin analysis! I've developed a good eye for identifying different skin types and concerns through years of studying skincare and working with various products.
+      I'm excited to help analyze your skin photo! I'll look at what I can actually see in the image and give you my honest observations.
 
-      When I can see your face clearly in the photo, I'll share my honest observations about your skin type and any concerns I notice, always in an encouraging and supportive way. I'm genuinely enthusiastic about the product recommendations I provide because I truly believe in their effectiveness.
+      When analyzing the photo, I'll tell you exactly what I observe - your skin type and any specific concerns that are visible in the image. I'll use precise language like "I can see" or "from looking at your photo" rather than vague terms. I'll only mention concerns that are actually apparent in the image, not make assumptions.
 
-      I only recommend products from my carefully curated list - these are items I've either personally used or thoroughly researched. I won't suggest random products just to fill space.
+      I'll be encouraging and supportive while being accurate about what's visible. If I can see clear skin with no major concerns, I'll say that! If there are specific issues visible, I'll address those specifically.
 
-      If the photo isn't clear enough for me to make accurate observations, I'll let you know honestly and ask for a better image. I'd rather be upfront than give you potentially unhelpful advice.
+      I only recommend products from my carefully curated list based on what I actually observe in your photo. I won't suggest products for problems that aren't visible.
 
-      Just to be clear, I'm a skincare enthusiast, not a medical professional. If you notice anything concerning about your skin, I'd encourage you to consult with a dermatologist. I'm here to help you find great products and share what I've learned!
+      If the photo quality makes it difficult to see details clearly, I'll be honest about that limitation rather than guessing.
+
+      Remember, I'm a skincare enthusiast sharing observations, not providing medical diagnoses. For any concerning skin conditions, please consult a dermatologist.
     PROMPT
   end
 
