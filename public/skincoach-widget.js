@@ -408,6 +408,31 @@ window.SkinCoach = (function() {
       }
     }
 
+    // Calculate realistic typing delay based on message length
+    function calculateTypingDelay(messageLength) {
+      // Average typing speed: 40-60 WPM (words per minute)
+      // Average word length: 5 characters
+      // So roughly 200-300 characters per minute
+      // Plus some thinking time and variation
+      
+      const baseWordsPerMinute = 45; // Average typing speed
+      const avgCharsPerWord = 5;
+      const charsPerMinute = baseWordsPerMinute * avgCharsPerWord;
+      const charsPerSecond = charsPerMinute / 60;
+      
+      // Base typing time
+      const typingTimeMs = (messageLength / charsPerSecond) * 1000;
+      
+      // Add thinking time (1-3 seconds) and some randomness
+      const thinkingTime = Math.random() * 2000 + 1000; // 1-3 seconds
+      const variationFactor = 0.8 + (Math.random() * 0.4); // 0.8-1.2x variation
+      
+      // Minimum 1 second, maximum 8 seconds for very long messages
+      const totalDelay = Math.min(Math.max(typingTimeMs * variationFactor + thinkingTime, 1000), 8000);
+      
+      return Math.round(totalDelay);
+    }
+
     // Add typing indicator
     function addTypingIndicator() {
       const typingDiv = document.createElement('div');
@@ -422,7 +447,7 @@ window.SkinCoach = (function() {
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         font-style: italic;
       `;
-      typingDiv.innerHTML = '🤔 Analyzing...';
+      typingDiv.innerHTML = 'typing...';
       messages.appendChild(typingDiv);
       messages.scrollTop = messages.scrollHeight;
       return typingDiv;
@@ -447,6 +472,13 @@ window.SkinCoach = (function() {
       try {
         const typingIndicator = addTypingIndicator();
         const response = await api.sendMessage(message);
+        
+        // Calculate realistic typing delay based on response length
+        const responseText = response.status === 'success' ? response.response : 'Sorry, I had trouble understanding that. Please try again.';
+        const typingDelay = calculateTypingDelay(responseText.length);
+        
+        // Wait for the calculated typing time
+        await new Promise(resolve => setTimeout(resolve, typingDelay));
         
         removeTypingIndicator();
         
@@ -518,6 +550,19 @@ window.SkinCoach = (function() {
       try {
         const typingIndicator = addTypingIndicator();
         const response = await api.analyzePhoto(file);
+        
+        // Calculate realistic typing delay for photo analysis response
+        let responseText = '';
+        if (response.status === 'success' && response.response) {
+          responseText = response.response;
+        } else {
+          // Estimate length for fallback response
+          responseText = 'Here are your skin analysis results with personalized product recommendations...';
+        }
+        const typingDelay = calculateTypingDelay(responseText.length);
+        
+        // Wait for the calculated typing time
+        await new Promise(resolve => setTimeout(resolve, typingDelay));
         
         removeTypingIndicator();
         
