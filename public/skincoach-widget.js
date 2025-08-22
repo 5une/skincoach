@@ -388,7 +388,7 @@ window.SkinCoach = (function() {
       
       if (history.length === 0) {
         // Add welcome message if no history
-        addMessage('👋 Hi! I\'m your AI skincare assistant. You can:<br>• Ask me skincare questions<br>• Upload a photo for skin analysis<br>• Drag & drop images directly here<br><br>How can I help you today?', false, null, true);
+        addMessage('👋 Hey there! I\'m so excited to help you with your skincare journey! You can:<br>• Ask me any skincare questions<br>• Upload a photo and I\'ll analyze your skin<br>• Drag & drop images directly here<br><br>What\'s on your mind today? 😊', false, null, true);
       } else {
         // Restore all messages from history
         history.forEach(messageData => {
@@ -404,7 +404,7 @@ window.SkinCoach = (function() {
       if (confirm('Are you sure you want to clear your chat history? This cannot be undone.')) {
         chatHistory.clearHistory();
         messages.innerHTML = '';
-        addMessage('👋 Chat cleared! How can I help you today?', false, null, true);
+        addMessage('👋 Fresh start! What skincare questions can I help you with? 😊', false, null, true);
       }
     }
 
