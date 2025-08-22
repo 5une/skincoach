@@ -301,6 +301,7 @@ window.SkinCoach = (function() {
         max-width: 85%;
         ${isUser ? 'margin-left: auto;' : ''}
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
       `;
       
       let messageContent = '';
@@ -334,14 +335,40 @@ window.SkinCoach = (function() {
       // Add text content (render markdown for bot messages)
       messageContent += isUser ? content : markdown.render(content);
       
+      // Add status indicator for user messages
+      if (isUser) {
+        messageContent += `
+          <div class="message-status" style="
+            text-align: right;
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.7;
+          ">
+            <span class="status-text">sent</span>
+          </div>
+        `;
+      }
+      
       messageDiv.innerHTML = messageContent;
       messages.appendChild(messageDiv);
       messages.scrollTop = messages.scrollHeight;
+      
+      // Mark as seen after a short delay for user messages
+      if (isUser && !skipSave) {
+        setTimeout(() => {
+          const statusElement = messageDiv.querySelector('.status-text');
+          if (statusElement) {
+            statusElement.textContent = 'seen';
+          }
+        }, 800 + Math.random() * 700); // Random delay between 0.8-1.5 seconds
+      }
       
       // Save to localStorage unless explicitly skipping
       if (!skipSave) {
         chatHistory.saveMessage(content, isUser, imageData);
       }
+      
+      return messageDiv;
     }
 
     // Add message from stored data (for restoration)
@@ -408,6 +435,13 @@ window.SkinCoach = (function() {
       }
     }
 
+    // Calculate random delay before starting to type (reading/thinking time)
+    function calculatePreTypingDelay() {
+      // Realistic delay for reading message and starting to type
+      // 1-4 seconds depending on message complexity
+      return Math.random() * 3000 + 1000; // 1-4 seconds
+    }
+
     // Calculate realistic typing delay based on message length
     function calculateTypingDelay(messageLength) {
       // Average typing speed: 40-60 WPM (words per minute)
@@ -470,6 +504,10 @@ window.SkinCoach = (function() {
       input.value = '';
       
       try {
+        // Wait for pre-typing delay (reading/thinking time)
+        const preTypingDelay = calculatePreTypingDelay();
+        await new Promise(resolve => setTimeout(resolve, preTypingDelay));
+        
         const typingIndicator = addTypingIndicator();
         const response = await api.sendMessage(message);
         
@@ -548,6 +586,10 @@ window.SkinCoach = (function() {
       await addMessage('📸 Analyzing your skin photo...', true, file);
       
       try {
+        // Wait for pre-typing delay (photo analysis thinking time)
+        const preTypingDelay = calculatePreTypingDelay();
+        await new Promise(resolve => setTimeout(resolve, preTypingDelay));
+        
         const typingIndicator = addTypingIndicator();
         const response = await api.analyzePhoto(file);
         
