@@ -8,9 +8,15 @@ class ChatService
     @client = OpenAI::Client.new(access_token: @api_key)
   end
 
-  def respond_to_skin_question(message)
+    def respond_to_skin_question(message)
     Rails.logger.info "Processing skin question: #{message[0..100]}..."
-    
+
+    # Check if user is asking about photo analysis first
+    if asking_about_photo_analysis?(message)
+      Rails.logger.info "Detected photo analysis question"
+      return respond_about_photo_capabilities(message)
+    end
+
     # Check if user is asking for product recommendations
     if asking_for_product_recommendations?(message)
       Rails.logger.info "Detected product recommendation request"
@@ -88,6 +94,34 @@ class ChatService
   end
 
   private
+
+  def asking_about_photo_analysis?(message)
+    message_lower = message.downcase
+    
+    # Check for photo analysis keywords
+    photo_keywords = [
+      'analyze photo', 'analyze my photo', 'analyze picture', 'analyze my picture',
+      'look at photo', 'look at my photo', 'look at picture', 'look at my picture',
+      'check photo', 'check my photo', 'check picture', 'check my picture',
+      'analyze my skin', 'analyze skin', 'photo analysis', 'picture analysis',
+      'upload photo', 'upload picture', 'send photo', 'send picture',
+      'can you analyze', 'can you look at', 'can you check'
+    ]
+    
+    photo_keywords.any? { |keyword| message_lower.include?(keyword) }
+  end
+
+  def respond_about_photo_capabilities(message)
+    Rails.logger.info "Responding about photo analysis capabilities"
+    
+    response_text = "Yes! I'd love to analyze your skin photo! 📸 Just upload a clear picture of your face and I'll take a look at your skin type, any concerns I notice, and recommend some products that could work great for you. \n\nMake sure it's well-lit and shows your face clearly so I can give you the best analysis possible! What are you hoping to work on with your skin? ✨"
+    
+    {
+      message: response_text,
+      analysis: nil,
+      recommendations: nil
+    }
+  end
 
   def asking_for_product_recommendations?(message)
     message_lower = message.downcase
@@ -416,6 +450,8 @@ class ChatService
       I'm a friendly skincare enthusiast who loves helping people with their skin! I'm knowledgeable but not a doctor - just someone who's really into skincare and loves sharing tips. 
 
       Chat naturally like talking to a friend who asked for skincare advice. Use casual language, be encouraging, and share enthusiasm for healthy skin. Talk about ingredients and routines the way a skincare-loving friend would - with excitement but also honesty about what works and what doesn't.
+
+      I can analyze skin photos to help identify skin types and concerns, and I love recommending products based on what I see! If someone asks about photo analysis, encourage them to upload a clear face photo so I can take a look and give personalized advice.
 
       If someone brings up serious skin issues, gently suggest they chat with a dermatologist since I'm just a skincare enthusiast, not a medical professional. Keep things light, helpful, and conversational. Aim for under 300 words so you don't overwhelm them!
 
