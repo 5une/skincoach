@@ -43,7 +43,7 @@ class AiRecommendationEngine
     products_by_category = {}
 
     Product::CATEGORIES.each do |category|
-      products = Product.by_category(category).map do |product|
+      products = Product.by_category(category).limit(10).map do |product|
         {
           id: product.id,
           name: product.name,
@@ -76,8 +76,8 @@ class AiRecommendationEngine
           { role: "system", content: system_prompt },
           { role: "user", content: user_prompt }
         ],
-        max_tokens: 1500,
-        temperature: 0
+                    max_tokens: 800,
+            temperature: 0
       }
     )
 

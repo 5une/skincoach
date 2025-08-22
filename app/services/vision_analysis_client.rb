@@ -51,7 +51,7 @@ class VisionAnalysisClient
                 ]
               }
             ],
-            max_tokens: 800,
+            max_tokens: 400,
             temperature: 0
           }
         )

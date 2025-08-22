@@ -257,7 +257,7 @@ class ChatService
           { role: "system", content: product_recommendation_system_prompt },
           { role: "user", content: prompt }
         ],
-        max_tokens: 500,
+        max_tokens: 300,
         temperature: 0.1
       }
     )
@@ -337,7 +337,7 @@ class ChatService
             content: prompt
           }
         ],
-        max_tokens: 500,
+        max_tokens: 300,
         temperature: 0
       }
     )
