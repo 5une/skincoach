@@ -336,12 +336,21 @@ const SkinCareChat = {
     this.addTypingIndicator();
     
     try {
+      // Build conversation history for context
+      const conversationHistory = this.chatHistory.map(msg => ({
+        role: msg.type === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+      
       const response = await fetch('/api/v1/chat/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: message })
+        body: JSON.stringify({ 
+          message: message,
+          conversation_history: conversationHistory
+        })
       });
       
       const data = await response.json();
@@ -406,8 +415,15 @@ const SkinCareChat = {
     this.addTypingIndicator();
     
     try {
+      // Build conversation history for context
+      const conversationHistory = this.chatHistory.map(msg => ({
+        role: msg.type === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+      
       const formData = new FormData();
       formData.append('photo', file);
+      formData.append('conversation_history', JSON.stringify(conversationHistory));
       
       const response = await fetch('/api/v1/chat/message', {
         method: 'POST',

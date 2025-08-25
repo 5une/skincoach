@@ -9,6 +9,7 @@ class Api::V1::ChatController < ApplicationController
   def message
     message_text = params[:message]
     photo = params[:photo]
+    conversation_history = params[:conversation_history] || []
     
     # At least one input is required
     if message_text.blank? && photo.blank?
@@ -22,10 +23,10 @@ class Api::V1::ChatController < ApplicationController
       # Handle photo analysis if photo is provided
       if photo.present?
         Rails.logger.info "Processing chat message with photo analysis"
-        response = chat_service.respond_with_photo_analysis(message_text, photo)
+        response = chat_service.respond_with_photo_analysis(message_text, photo, conversation_history)
       else
         Rails.logger.info "Processing text-only chat message"
-        response = chat_service.respond_to_skin_question(message_text)
+        response = chat_service.respond_to_skin_question(message_text, conversation_history)
       end
       
       render json: {

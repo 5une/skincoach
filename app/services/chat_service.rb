@@ -8,7 +8,7 @@ class ChatService
     @client = OpenAI::Client.new(access_token: @api_key)
   end
 
-    def respond_to_skin_question(message)
+  def respond_to_skin_question(message, conversation_history = [])
     Rails.logger.info "Processing skin question: #{message[0..100]}..."
 
     # Check if user is asking about photo analysis first
@@ -18,25 +18,36 @@ class ChatService
     end
 
     # Check if user is asking for product recommendations
-    if asking_for_product_recommendations?(message)
-      Rails.logger.info "Detected product recommendation request"
-      return respond_with_product_recommendations(message)
+    # (Product recommendations will be handled naturally in conversation flow)
+    
+    # Build the chat completion request with conversation history
+    messages = [
+      {
+        role: "system",
+        content: system_prompt
+      }
+    ]
+    
+    # Add conversation history if provided
+    if conversation_history.any?
+      conversation_history.each do |msg|
+        messages << {
+          role: msg['role'] == 'user' ? 'user' : 'assistant',
+          content: msg['content']
+        }
+      end
     end
     
-    # Build the chat completion request
+    # Add current message
+    messages << {
+      role: "user",
+      content: message
+    }
+    
     response = @client.chat(
       parameters: {
         model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: system_prompt
-          },
-          {
-            role: "user",
-            content: message
-          }
-        ],
+        messages: messages,
         max_tokens: 400,
         temperature: 0.1
       }
@@ -61,7 +72,7 @@ class ChatService
     raise ChatError, "Failed to generate response: #{e.message}"
   end
 
-  def respond_with_photo_analysis(message_text, photo)
+  def respond_with_photo_analysis(message_text, photo, conversation_history = [])
     Rails.logger.info "Processing photo analysis with optional message: #{message_text&.[](0..50)}..."
     
     begin
@@ -71,7 +82,7 @@ class ChatService
       Rails.logger.info "Vision analysis completed"
 
       # Step 2: Generate initial conversational response (no product recommendations yet)
-      conversation_response = generate_initial_analysis_response(analysis_data, message_text)
+      conversation_response = generate_initial_analysis_response(analysis_data, message_text, conversation_history)
       Rails.logger.info "Initial conversational response generated"
 
       {
@@ -313,27 +324,42 @@ class ChatService
     PROMPT
   end
 
-  def generate_initial_analysis_response(analysis_data, user_message)
+  def generate_initial_analysis_response(analysis_data, user_message, conversation_history = [])
     # Build simple context for initial response (no recommendations)
     context = build_simple_analysis_context(analysis_data)
     
     # Create prompt for initial photo reaction
     prompt = build_analysis_response_prompt(context, user_message)
     
+    # Build messages with conversation history
+    messages = [
+      {
+        role: "system",
+        content: analysis_system_prompt
+      }
+    ]
+    
+    # Add conversation history if provided
+    if conversation_history.any?
+      conversation_history.each do |msg|
+        messages << {
+          role: msg['role'] == 'user' ? 'user' : 'assistant',
+          content: msg['content']
+        }
+      end
+    end
+    
+    # Add current analysis prompt
+    messages << {
+      role: "user", 
+      content: prompt
+    }
+    
     # Generate conversational response
     response = @client.chat(
       parameters: {
         model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: analysis_system_prompt
-          },
-          {
-            role: "user", 
-            content: prompt
-          }
-        ],
+        messages: messages,
         max_tokens: 300,
         temperature: 0.3
       }
