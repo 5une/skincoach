@@ -9,7 +9,17 @@ class Api::V1::ChatController < ApplicationController
   def message
     message_text = params[:message]
     photo = params[:photo]
+    
+    # Parse conversation history if it's a JSON string
     conversation_history = params[:conversation_history] || []
+    if conversation_history.is_a?(String)
+      begin
+        conversation_history = JSON.parse(conversation_history)
+      rescue JSON::ParserError => e
+        Rails.logger.warn "Failed to parse conversation_history: #{e.message}"
+        conversation_history = []
+      end
+    end
     
     # At least one input is required
     if message_text.blank? && photo.blank?

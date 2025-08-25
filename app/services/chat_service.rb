@@ -29,8 +29,9 @@ class ChatService
     ]
     
     # Add conversation history if provided
-    if conversation_history.any?
+    if conversation_history.is_a?(Array) && conversation_history.any?
       conversation_history.each do |msg|
+        next unless msg.is_a?(Hash) && msg['role'] && msg['content']
         messages << {
           role: msg['role'] == 'user' ? 'user' : 'assistant',
           content: msg['content']
@@ -340,8 +341,9 @@ class ChatService
     ]
     
     # Add conversation history if provided
-    if conversation_history.any?
+    if conversation_history.is_a?(Array) && conversation_history.any?
       conversation_history.each do |msg|
+        next unless msg.is_a?(Hash) && msg['role'] && msg['content']
         messages << {
           role: msg['role'] == 'user' ? 'user' : 'assistant',
           content: msg['content']
