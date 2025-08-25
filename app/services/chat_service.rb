@@ -380,9 +380,9 @@ class ChatService
 
   def build_simple_analysis_context(analysis_data)
     # Extract basic analysis information without recommendations
-    face_detected = analysis_data.dig('face_detected') || false
-    skin_type = analysis_data.dig('skin_assessment', 'overall_skin_type') || 'unknown'
-    concerns = analysis_data.dig('skin_assessment', 'specific_concerns') || []
+    face_detected = analysis_data['face_detected'] || false
+    skin_type = analysis_data['skin_type'] || 'unknown'
+    concerns = Array(analysis_data['concerns']) || []
     
     {
       face_detected: face_detected,
@@ -424,13 +424,13 @@ class ChatService
         - Skin type: #{context[:skin_type]}
         - What you can see: #{concerns_list}
         
-        Give a brief, honest reaction based EXACTLY on what you observed. If you see concerns like acne, redness, etc., mention them directly. If the skin looks clear, say so. Be accurate to what's actually in the analysis.
+        Respond based EXACTLY on what the analysis shows. If the analysis lists concerns, mention them specifically. If it lists "no major concerns" then the skin truly looks clear. 
         
-        Then ask a relevant follow-up question about their experience - like how long they've had these specific concerns, their current routine, or what they've tried before.
+        IMPORTANT: Your response must match the analysis results. If concerns are listed (like acne, redness, dryness), mention them directly: "I can see [specific concerns]". Only say skin looks good if the concerns list is actually empty.
         
-        Don't recommend any specific products yet. Just focus on understanding their situation.
+        Then ask a relevant follow-up question based on what you observed.
         
-        Keep it conversational and brief. Be honest about what you see.
+        Don't recommend products yet. Keep it conversational and accurate to the analysis data.
       PROMPT
     else
       prompt = <<~PROMPT

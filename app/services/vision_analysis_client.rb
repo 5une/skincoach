@@ -52,7 +52,7 @@ class VisionAnalysisClient
               }
             ],
             max_tokens: 400,
-            temperature: 0.1
+            temperature: 0.3
           }
         )
 
@@ -161,49 +161,52 @@ class VisionAnalysisClient
 
   def system_prompt
     <<~PROMPT
-      You are a professional skincare analyst. Carefully examine facial skin photos to identify all visible skin characteristics and concerns. Look closely for acne, redness, dryness, oiliness, texture issues, and other skin conditions. Be thorough and accurate in your observations. Provide detailed analysis in JSON format only.
+      You are a professional skincare analyst with keen attention to detail. Your job is to identify ALL visible skin issues and concerns in facial photos. Do not minimize or overlook problems - be thorough and observant. Even minor imperfections should be noted. Look for any signs of acne, redness, irritation, dryness, oiliness, uneven texture, dark spots, or other skin issues. If you see ANY problems, identify them. Provide detailed, accurate analysis in JSON format only.
     PROMPT
   end
 
   def user_prompt
     <<~PROMPT
-      Carefully examine this facial skin photo and identify ALL visible skin concerns. Look for:
-      - Acne (pimples, blackheads, whiteheads, cysts)
-      - Redness (irritation, inflammation, broken capillaries)
-      - Dryness (flaking, rough texture, tightness)
-      - Oiliness (shine, enlarged pores, greasy appearance)
-      - Hyperpigmentation (dark spots, uneven tone, melasma)
-      - Sensitivity (irritation, reactivity signs)
+      CAREFULLY EXAMINE this facial skin photo and identify EVERY visible skin issue or concern. Your task is to detect problems, not to give reassurance. Look specifically for:
 
-      Be thorough and accurate. Don't miss obvious concerns. Return JSON:
+      - ACNE: Any pimples, blackheads, whiteheads, bumps, blemishes, or cystic lesions
+      - REDNESS: Any irritation, inflammation, broken capillaries, or red patches  
+      - DRYNESS: Any flaking, rough patches, or areas that look parched
+      - OILINESS: Any shine, greasy areas, or enlarged pores
+      - HYPERPIGMENTATION: Any dark spots, uneven tone, or discoloration
+      - TEXTURE ISSUES: Any roughness, scarring, or uneven surface
+      - OTHER CONCERNS: Any other visible skin problems
 
+      DO NOT say the skin looks "good" or "clear" unless it truly has NO visible issues whatsoever. If you see ANY problems, no matter how minor, identify them.
+
+      Return JSON:
       {
         "face_detected": true | false,
         "skin_type": "dry" | "oily" | "combination" | "normal" | "unknown",
         "concerns": ["acne", "redness", "dryness", "oiliness", "hyperpigmentation", "sensitivity"],
         "severity": { "concern_name": "mild" | "moderate" | "noticeable" },
-        "notes": "Detailed description of what you observe"
+        "notes": "Detailed description of specific issues you observe"
       }
 
       If no face detected: set face_detected=false, skin_type="unknown", concerns=[], severity={}, notes explaining why.
-      If face detected: analyze ALL visible skin characteristics thoroughly. Don't be overly conservative - identify concerns that are clearly visible.
+      If face detected: Identify ALL visible issues. Be observant and critical, not reassuring. Your job is to find problems that exist.
     PROMPT
   end
 
   def fallback_system_prompt
     <<~PROMPT
-      Describe images in JSON format. Be factual and helpful.
+      You are analyzing facial skin. Look for all visible skin problems and issues. Be thorough and observant. Identify any acne, redness, dryness, or other concerns you can see. Provide factual analysis in JSON format.
     PROMPT
   end
 
   def fallback_user_prompt
     <<~PROMPT
-      Examine this photo thoroughly and identify any skin issues. Look for acne, redness, dryness, oiliness, dark spots, or other concerns.
+      EXAMINE this photo thoroughly and identify ANY visible skin problems. Look for acne, redness, dryness, oiliness, dark spots, bumps, blemishes, or other concerns. DO NOT minimize issues.
 
       Return JSON:
-      {"face_detected": true|false, "skin_type": "dry|oily|combination|normal|unknown", "concerns": [], "severity": {}, "notes": "detailed description"}
+      {"face_detected": true|false, "skin_type": "dry|oily|combination|normal|unknown", "concerns": [], "severity": {}, "notes": "detailed description of problems seen"}
       
-      If face visible: analyze skin thoroughly and identify ALL visible concerns. If no face: set face_detected=false, other fields to defaults. Return JSON only.
+      If face visible: analyze skin critically and identify ALL visible concerns - be thorough, not reassuring. If no face: set face_detected=false, other fields to defaults. Return JSON only.
     PROMPT
   end
 
