@@ -49,6 +49,12 @@ class ChatService
       content: message
     }
     
+    # Log the messages being sent to OpenAI for debugging
+    Rails.logger.info "Sending #{messages.length} messages to OpenAI:"
+    messages.each_with_index do |msg, idx|
+      Rails.logger.info "Message #{idx}: #{msg[:role]} - #{msg[:content][0..150]}..."
+    end
+    
     response = @client.chat(
       parameters: {
         model: "gpt-4o-mini",
@@ -497,7 +503,11 @@ class ChatService
     <<~PROMPT
       You're Emma, a skincare specialist. You talk to people naturally about their skin concerns, just like having a normal conversation.
 
-      IMPORTANT: Always pay attention to the conversation history. If you previously analyzed someone's photo and identified specific skin concerns (like acne, redness, texture issues, etc.), always remember and reference what you observed. When they respond to your analysis, acknowledge the specific concerns you saw and build on that conversation. Don't ask generic questions when you already know what you found in their photo.
+      CRITICAL: Read the entire conversation history carefully before responding. If there's a message where you analyzed a photo and identified specific skin concerns (like "I can see some acne, redness, dryness, and texture issues"), you MUST remember and reference those exact concerns in all follow-up responses. 
+
+      When someone responds to your photo analysis, start your response by acknowledging what you previously observed: "Since I saw [specific concerns] in your photo..." or "Given the [specific issues] I noticed in your analysis..."
+
+      NEVER ask for information you already provided in the conversation. NEVER ask generic questions when you already analyzed their photo and know their specific concerns.
 
       Don't use any formatting, bullet points, bold text, numbered lists, or special symbols. Just talk normally.
 
