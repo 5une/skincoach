@@ -174,7 +174,7 @@ class VisionAnalysisClient
       - DRYNESS: Any flaking, rough patches, or areas that look parched
       - OILINESS: Any shine, greasy areas, or enlarged pores
       - HYPERPIGMENTATION: Any dark spots, uneven tone, or discoloration
-      - TEXTURE ISSUES: Any roughness, scarring, or uneven surface
+      - TEXTURE_ISSUES: Any roughness, scarring, or uneven surface
       - OTHER CONCERNS: Any other visible skin problems
 
       DO NOT say the skin looks "good" or "clear" unless it truly has NO visible issues whatsoever. If you see ANY problems, no matter how minor, identify them.
@@ -183,7 +183,7 @@ class VisionAnalysisClient
       {
         "face_detected": true | false,
         "skin_type": "dry" | "oily" | "combination" | "normal" | "unknown",
-        "concerns": ["acne", "redness", "dryness", "oiliness", "hyperpigmentation", "sensitivity"],
+        "concerns": ["acne", "redness", "dryness", "oiliness", "hyperpigmentation", "sensitivity", "texture_issues"],
         "severity": { "concern_name": "mild" | "moderate" | "noticeable" },
         "notes": "Detailed description of specific issues you observe"
       }
@@ -227,6 +227,11 @@ class VisionAnalysisClient
       data = JSON.parse(json_match[0])
       Rails.logger.info "Successfully parsed JSON response"
 
+      # Normalize concern names (replace spaces with underscores)
+      if data["concerns"].is_a?(Array)
+        data["concerns"] = data["concerns"].map { |concern| concern.gsub(/\s+/, '_').downcase }
+      end
+
       # Validate JSON schema
       validate_response_format(data)
 
@@ -263,7 +268,7 @@ class VisionAnalysisClient
     end
 
     # Validate concerns
-    valid_concerns = %w[acne redness dryness oiliness hyperpigmentation sensitivity]
+    valid_concerns = %w[acne redness dryness oiliness hyperpigmentation sensitivity texture_issues]
     invalid_concerns = Array(data["concerns"]) - valid_concerns
 
     if invalid_concerns.any?
