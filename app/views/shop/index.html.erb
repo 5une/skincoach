@@ -1,227 +1,555 @@
 <div class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-  <div class="container">
-    <!-- Background elements -->
-    <div class="bg-elements">
-      <div class="bg-element animate-float" style="top: 80px; left: 40px; width: 128px; height: 128px; background: linear-gradient(135deg, rgba(255, 235, 59, 0.25), rgba(255, 193, 7, 0.2));"></div>
-      <div class="bg-element animate-float-delayed" style="top: 160px; right: 80px; width: 96px; height: 96px; background: linear-gradient(135deg, rgba(33, 150, 243, 0.25), rgba(0, 188, 212, 0.2));"></div>
-      <div class="bg-element animate-float-slow" style="bottom: 128px; left: 25%; width: 160px; height: 160px; background: linear-gradient(135deg, rgba(233, 30, 99, 0.25), rgba(244, 67, 54, 0.2));"></div>
-      <div class="bg-element animate-float" style="bottom: 80px; right: 33.33%; width: 112px; height: 112px; background: linear-gradient(135deg, rgba(63, 81, 181, 0.2), rgba(103, 58, 183, 0.25));"></div>
-      <div class="bg-element animate-float-delayed" style="top: 33.33%; left: 50%; width: 144px; height: 144px; background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(255, 87, 34, 0.25));"></div>
-      <div class="bg-element animate-float-slow" style="top: 240px; left: 80px; width: 80px; height: 80px; background: linear-gradient(135deg, rgba(233, 30, 99, 0.25), rgba(156, 39, 176, 0.2));"></div>
-      <div class="bg-element animate-float" style="bottom: 160px; right: 40px; width: 120px; height: 120px; background: linear-gradient(135deg, rgba(0, 188, 212, 0.2), rgba(33, 150, 243, 0.25));"></div>
-      <div class="bg-element animate-float-delayed" style="top: 320px; right: 25%; width: 104px; height: 104px; background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 152, 0, 0.2));"></div>
+  <div class="absolute inset-0 -z-10">
+    <div class="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-yellow-300/25 to-amber-400/20 rounded-full blur-3xl animate-float"></div>
+    <div class="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-blue-400/25 to-cyan-400/20 rounded-full blur-3xl animate-float-delayed"></div>
+    <div class="absolute bottom-32 left-1/4 w-40 h-40 bg-gradient-to-br from-pink-400/25 to-rose-400/20 rounded-full blur-3xl animate-float-slow"></div>
+    <div class="absolute bottom-20 right-1/3 w-28 h-28 bg-gradient-to-br from-blue-500/20 to-indigo-400/25 rounded-full blur-3xl animate-float"></div>
+    <div class="absolute top-1/3 left-1/2 w-36 h-36 bg-gradient-to-br from-yellow-400/20 to-orange-300/25 rounded-full blur-3xl animate-float-delayed"></div>
+    <div class="absolute top-60 left-20 w-20 h-20 bg-gradient-to-br from-pink-300/25 to-purple-400/20 rounded-full blur-3xl animate-float-slow"></div>
+    <div class="absolute bottom-40 right-10 w-30 h-30 bg-gradient-to-br from-cyan-300/20 to-blue-400/25 rounded-full blur-3xl animate-float"></div>
+    <div class="absolute top-80 right-1/4 w-26 h-26 bg-gradient-to-br from-amber-300/25 to-yellow-400/20 rounded-full blur-3xl animate-float-delayed"></div>
+  </div>
+  <div class="w-full max-w-2xl mx-auto relative z-10" data-np-autofill-form-type="other" data-np-checked="1" data-np-watching="1">
+    <div class="text-center mb-8">
+      <div class="flex items-center justify-center gap-2 mb-4">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center glass">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles w-6 h-6 text-primary-foreground">
+            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path>
+            <path d="M20 3v4"></path>
+            <path d="M22 5h-4"></path>
+            <path d="M4 17v2"></path>
+            <path d="M5 18H3"></path>
+          </svg>
+        </div>
+      </div>
+      <h1 class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">AI Skin Aesthetics Expert</h1>
+      <p class="text-muted-foreground">Your personal skincare consultant for healthy, radiant skin</p>
     </div>
-
-    <div class="main-content">
-      <!-- Header -->
-      <div class="header">
-        <div class="icon-container">
-          <div class="icon glass">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path>
-              <path d="M20 3v4"></path>
-              <path d="M22 5h-4"></path>
-              <path d="M4 17v2"></path>
-              <path d="M5 18H3"></path>
+    <div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 glass-card-enhanced border-0 shadow-2xl backdrop-blur-xl bg-background/30">
+      <div class="h-96 overflow-y-auto p-6 space-y-4">
+        <div class="flex justify-start">
+          <div class="max-w-[80%] rounded-2xl px-4 py-3 glass-message border border-border/30 mr-4 backdrop-blur-sm bg-background/20">
+            <p class="text-sm leading-relaxed">Hello! I'm your AI Skin Aesthetics Expert. I can help you with skincare routines, product recommendations, skin analysis, and personalized beauty advice. What skin concerns would you like to address today?</p>
+            <span class="text-xs opacity-70 mt-1 block">05:32 PM</span>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 pb-4">
+        <div class="flex flex-wrap gap-2">
+          <button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 glass border-border/30 hover:bg-white/20 hover:border-border/50 hover:text-current bg-transparent backdrop-blur-sm text-xs transition-all duration-200">What's the best skincare routine for my age?</button>
+          <button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 glass border-border/30 hover:bg-white/20 hover:border-border/50 hover:text-current bg-transparent backdrop-blur-sm text-xs transition-all duration-200">How to treat acne and breakouts?</button>
+          <button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 glass border-border/30 hover:bg-white/20 hover:border-border/50 hover:text-current bg-transparent backdrop-blur-sm text-xs transition-all duration-200">Recommend anti-aging products</button>
+          <button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 glass border-border/30 hover:bg-white/20 hover:border-border/50 hover:text-current bg-transparent backdrop-blur-sm text-xs transition-all duration-200">Help with dry skin solutions</button>
+        </div>
+      </div>
+      <div class="p-6 pt-0 border-t border-border/20 backdrop-blur-sm">
+        <div class="flex items-center gap-3">
+          <button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 size-9 glass border-border/30 hover:bg-secondary/20 shrink-0 bg-transparent backdrop-blur-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus w-4 h-4">
+              <path d="M5 12h14"></path>
+              <path d="M12 5v14"></path>
             </svg>
+          </button>
+          <div class="flex-1 relative">
+            <input data-slot="input" class="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive glass border-border/30 bg-input/30 backdrop-blur-sm placeholder:text-muted-foreground/70 pr-12" placeholder="Ask me about skincare routines, products, skin concerns, or beauty advice..." value="" data-np-intersection-state="visible">
           </div>
-        </div>
-        <h1 class="title">AI Skin Aesthetics Expert</h1>
-        <p class="subtitle">Your personal skincare consultant for healthy, radiant skin</p>
-      </div>
-
-      <!-- Chat Card -->
-      <div class="chat-card glass-card-enhanced">
-        <!-- Chat Messages -->
-        <div class="chat-messages" id="chatMessages">
-          <div class="message-container bot">
-            <div class="message bot glass-message">
-              <p>Hello! I'm your AI Skin Aesthetics Expert. I can help you with skincare routines, product recommendations, skin analysis, and personalized beauty advice. What skin concerns would you like to address today?</p>
-              <span class="message-time" id="currentTime">05:13 PM</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-          <div class="actions-grid">
-            <button class="action-btn" onclick="sendQuickMessage('What\'s the best skincare routine for my age?')">What's the best skincare routine for my age?</button>
-            <button class="action-btn" onclick="sendQuickMessage('How to treat acne and breakouts?')">How to treat acne and breakouts?</button>
-            <button class="action-btn" onclick="sendQuickMessage('Recommend anti-aging products')">Recommend anti-aging products</button>
-            <button class="action-btn" onclick="sendQuickMessage('Help with dry skin solutions')">Help with dry skin solutions</button>
-          </div>
-        </div>
-
-        <!-- Input Area -->
-        <div class="input-area">
-          <div class="input-container">
-            <button class="upload-btn" onclick="document.getElementById('imageUpload').click()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14"></path>
-                <path d="M12 5v14"></path>
-              </svg>
-            </button>
-            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
-            <div class="input-wrapper">
-              <input type="text" class="chat-input" id="chatInput" placeholder="Ask me about skincare routines, products, skin concerns, or beauty advice..." onkeypress="handleKeyPress(event)">
-            </div>
-            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path>
-                <path d="m21.854 2.147-10.94 10.939"></path>
-              </svg>
-            </button>
-          </div>
+          <button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground shadow-xs size-9 bg-primary/90 hover:bg-primary backdrop-blur-sm shrink-0" disabled="">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send w-4 h-4">
+              <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path>
+              <path d="m21.854 2.147-10.94 10.939"></path>
+            </svg>
+          </button>
         </div>
       </div>
-
-      <!-- Footer -->
-      <div class="footer">
-        <p class="footer-text">Powered by <span class="brand">WeMakeAutomations</span></p>
-      </div>
+    </div>
+    <div class="text-center mt-6">
+      <p class="text-xs text-muted-foreground">Powered by <span class="font-semibold text-primary">WeMakeAutomations</span>
+      </p>
     </div>
   </div>
+</div>
 
-  <script>
-    // Set current time
-    document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-
-    // Chat functionality
-    function addMessage(text, isUser = false, imageFile = null) {
-      const chatMessages = document.getElementById('chatMessages');
-      const messageContainer = document.createElement('div');
-      messageContainer.className = `message-container ${isUser ? 'user' : 'bot'}`;
-      
-      const message = document.createElement('div');
-      message.className = `message ${isUser ? 'user' : 'bot'}${!isUser ? ' glass-message' : ''}`;
-      
-      let content = `<p>${text}</p>`;
-      
-      if (imageFile) {
-        const imageUrl = URL.createObjectURL(imageFile);
-        content = `<img src="${imageUrl}" style="max-width: 200px; border-radius: 8px; margin-bottom: 8px;"><br>${content}`;
-      }
-      
-      const time = new Date().toLocaleTimeString('en-US', {
+<script>
+// AI Skincare Chat Application
+const SkinCareChat = {
+  isProcessing: false,
+  chatHistory: JSON.parse(localStorage.getItem('skincare_chat') || '[]'),
+  
+  init() {
+    this.updateCurrentTime();
+    this.loadChatHistory();
+    this.bindEvents();
+    this.setupDragDrop();
+  },
+  
+  updateCurrentTime() {
+    const timeElement = document.querySelector('.text-xs.opacity-70');
+    if (timeElement) {
+      timeElement.textContent = new Date().toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
       });
-      
-      content += `<span class="message-time">${time}</span>`;
-      message.innerHTML = content;
-      
-      messageContainer.appendChild(message);
-      chatMessages.appendChild(messageContainer);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-
-    function addTypingIndicator() {
-      const chatMessages = document.getElementById('chatMessages');
-      const messageContainer = document.createElement('div');
-      messageContainer.className = 'message-container bot';
-      messageContainer.id = 'typingIndicator';
-      
-      const message = document.createElement('div');
-      message.className = 'message bot glass-message';
-      message.innerHTML = '<p>typing...</p>';
-      
-      messageContainer.appendChild(message);
-      chatMessages.appendChild(messageContainer);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+  },
+  
+  loadChatHistory() {
+    const chatContainer = document.querySelector('.h-96.overflow-y-auto');
+    if (this.chatHistory.length === 0) return;
+    
+    // Clear existing messages except welcome
+    const welcomeMessage = chatContainer.querySelector('.flex.justify-start');
+    chatContainer.innerHTML = '';
+    if (welcomeMessage) {
+      chatContainer.appendChild(welcomeMessage);
     }
-
-    function removeTypingIndicator() {
-      const typingIndicator = document.getElementById('typingIndicator');
-      if (typingIndicator) {
-        typingIndicator.remove();
+    
+    // Load saved messages
+    this.chatHistory.forEach(item => {
+      if (item.type === 'user') {
+        this.addMessage(item.text, true, item.imageData ? this.dataURLtoFile(item.imageData) : null, false);
+      } else {
+        this.addMessage(item.text, false, null, false);
       }
+    });
+  },
+  
+  saveMessage(text, isUser, imageData = null) {
+    const message = {
+      type: isUser ? 'user' : 'bot',
+      text: text,
+      imageData: imageData,
+      timestamp: Date.now()
+    };
+    this.chatHistory.push(message);
+    localStorage.setItem('skincare_chat', JSON.stringify(this.chatHistory));
+  },
+  
+  async fileToBase64(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
+  },
+  
+  dataURLtoFile(dataurl) {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while(n--) {
+      u8arr[n] = bstr.charCodeAt(n);
     }
-
-    async function sendMessage() {
-      const input = document.getElementById('chatInput');
-      const message = input.value.trim();
-      
-      if (!message) return;
-      
-      // Add user message
-      addMessage(message, true);
-      input.value = '';
-      
-      // Add typing indicator
-      addTypingIndicator();
-      
-      try {
-        const response = await fetch('/api/v1/chat/message', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ message: message })
-        });
-        
-        const data = await response.json();
-        
-        // Remove typing indicator
-        removeTypingIndicator();
-        
-        if (data.error) {
-          addMessage('Sorry, I had trouble understanding that. Please try again.');
-        } else {
-          addMessage(data.response || 'I received your message!');
-        }
-      } catch (error) {
-        removeTypingIndicator();
-        addMessage('Sorry, there was an error processing your message.');
+    return new File([u8arr], 'uploaded-image.jpg', {type: mime});
+  },
+  
+  bindEvents() {
+    const chatInput = document.querySelector('input[placeholder*="skincare"]');
+    const sendBtn = document.querySelector('button[disabled] svg').parentElement;
+    
+    // Create hidden file input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+    
+    // Bind upload button
+    const uploadBtn = document.querySelector('.lucide-plus').parentElement;
+    uploadBtn.addEventListener('click', () => fileInput.click());
+    
+    // Bind file input
+    fileInput.addEventListener('change', (e) => this.handleImageUpload(e));
+    
+    // Bind send button
+    sendBtn.addEventListener('click', () => this.sendMessage());
+    sendBtn.disabled = false; // Enable send button
+    
+    // Bind enter key
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        this.sendMessage();
       }
-    }
-
-    function sendQuickMessage(text) {
-      const input = document.getElementById('chatInput');
-      input.value = text;
-      sendMessage();
-    }
-
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') {
-        sendMessage();
-      }
-    }
-
-    // Image upload functionality
-    document.getElementById('imageUpload').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        addMessage('Analyzing your skin photo...', true, file);
-        
-        addTypingIndicator();
-        
-        const formData = new FormData();
-        formData.append('photo', file);
-        
-        fetch('/api/v1/chat/message', {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          removeTypingIndicator();
-          
-          if (data.error) {
-            addMessage('🔧 Sorry, there was an error analyzing your photo. Please try again.');
-          } else {
-            addMessage(data.response || 'I\'ve analyzed your photo!');
-          }
-        })
-        .catch(error => {
-          removeTypingIndicator();
-          addMessage('🔧 Sorry, there was an error analyzing your photo. Please try again.');
+    });
+    
+    // Bind quick action buttons
+    document.querySelectorAll('button[data-slot="button"]').forEach(btn => {
+      if (btn.textContent.trim().length > 10) { // Only quick action buttons
+        btn.addEventListener('click', () => {
+          const text = btn.textContent.trim();
+          chatInput.value = text;
+          this.sendMessage();
         });
       }
     });
-  </script>
-</div>
+  },
+  
+  setupDragDrop() {
+    const chatContainer = document.querySelector('.h-96.overflow-y-auto');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      chatContainer.addEventListener(eventName, this.preventDefaults, false);
+    });
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+      chatContainer.addEventListener(eventName, () => {
+        chatContainer.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+      }, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      chatContainer.addEventListener(eventName, () => {
+        chatContainer.style.backgroundColor = '';
+      }, false);
+    });
+    
+    chatContainer.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0 && files[0].type.startsWith('image/')) {
+        this.processImageFile(files[0]);
+      }
+    }, false);
+  },
+  
+  preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  },
+  
+  addMessage(text, isUser = false, imageFile = null, save = true) {
+    const chatContainer = document.querySelector('.h-96.overflow-y-auto');
+    
+    const messageWrapper = document.createElement('div');
+    messageWrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = isUser 
+      ? 'max-w-[80%] rounded-2xl px-4 py-3 bg-primary/90 backdrop-blur-sm text-primary-foreground ml-4'
+      : 'max-w-[80%] rounded-2xl px-4 py-3 glass-message border border-border/30 mr-4 backdrop-blur-sm bg-background/20';
+    
+    let content = '';
+    
+    // Add image if present
+    if (imageFile) {
+      const imageUrl = URL.createObjectURL(imageFile);
+      content += `<img src="${imageUrl}" style="max-width: 200px; border-radius: 8px; margin-bottom: 8px; display: block;">`;
+    }
+    
+    // Process message content
+    if (!isUser) {
+      content += `<div class="text-sm leading-relaxed">${this.processMarkdown(text)}</div>`;
+    } else {
+      content += `<p class="text-sm leading-relaxed">${text}</p>`;
+    }
+    
+    // Add timestamp
+    const time = new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+    content += `<span class="text-xs opacity-70 mt-1 block">${time}</span>`;
+    
+    // Add message status for user messages
+    if (isUser) {
+      content += `<div class="text-xs opacity-60 mt-1"><span class="status-text">sent</span></div>`;
+      
+      // Simulate "seen" status
+      setTimeout(() => {
+        const statusText = messageDiv.querySelector('.status-text');
+        if (statusText) statusText.textContent = 'seen';
+      }, Math.random() * 1000 + 800);
+    }
+    
+    messageDiv.innerHTML = content;
+    messageWrapper.appendChild(messageDiv);
+    chatContainer.appendChild(messageWrapper);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    
+    // Save to localStorage
+    if (save) {
+      if (imageFile && isUser) {
+        this.fileToBase64(imageFile).then(base64 => {
+          this.saveMessage(text, isUser, base64);
+        });
+      } else {
+        this.saveMessage(text, isUser);
+      }
+    }
+  },
+  
+  processMarkdown(text) {
+    // Convert **bold** to <strong>
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Convert *italic* to <em>
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Convert [Product Name](url) to clickable links
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #3b82f6; text-decoration: underline;">$1</a>');
+    
+    // Style medical disclaimers
+    text = text.replace(
+      /(⚠️ Important:.*?)(?=\n\n|\n$|$)/g,
+      '<div style="font-size: 0.75rem; font-style: italic; color: #6b7280; background: #f9fafb; padding: 8px; border-left: 3px solid #fbbf24; border-radius: 4px; margin-top: 8px;">$1</div>'
+    );
+    
+    // Convert line breaks to <br>
+    text = text.replace(/\n/g, '<br>');
+    
+    return text;
+  },
+  
+  addTypingIndicator() {
+    const chatContainer = document.querySelector('.h-96.overflow-y-auto');
+    
+    const messageWrapper = document.createElement('div');
+    messageWrapper.className = 'flex justify-start';
+    messageWrapper.id = 'typingIndicator';
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'max-w-[80%] rounded-2xl px-4 py-3 glass-message border border-border/30 mr-4 backdrop-blur-sm bg-background/20';
+    messageDiv.innerHTML = '<p class="text-sm leading-relaxed">typing...</p>';
+    
+    messageWrapper.appendChild(messageDiv);
+    chatContainer.appendChild(messageWrapper);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  },
+  
+  removeTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
+    if (indicator) indicator.remove();
+  },
+  
+  calculateTypingDelay(messageLength) {
+    const wordsPerMinute = 45;
+    const charactersPerWord = 5;
+    const typingTime = (messageLength / charactersPerWord / wordsPerMinute) * 60 * 1000;
+    const thinkingTime = Math.random() * 2000 + 1000;
+    const variation = Math.random() * 0.4 + 0.8;
+    
+    return Math.min(Math.max(typingTime * variation + thinkingTime, 1000), 8000);
+  },
+  
+  calculatePreTypingDelay() {
+    return Math.random() * 3000 + 1000;
+  },
+  
+  async sendMessage() {
+    if (this.isProcessing) return;
+    
+    const chatInput = document.querySelector('input[placeholder*="skincare"]');
+    const message = chatInput.value.trim();
+    
+    if (!message) return;
+    
+    this.isProcessing = true;
+    
+    // Add user message
+    this.addMessage(message, true);
+    chatInput.value = '';
+    
+    // Pre-typing delay
+    await new Promise(resolve => setTimeout(resolve, this.calculatePreTypingDelay()));
+    
+    // Add typing indicator
+    this.addTypingIndicator();
+    
+    try {
+      const response = await fetch('/api/v1/chat/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: message })
+      });
+      
+      const data = await response.json();
+      
+      // Calculate realistic typing delay
+      const typingDelay = this.calculateTypingDelay(data.response?.length || 100);
+      await new Promise(resolve => setTimeout(resolve, typingDelay));
+      
+      // Remove typing indicator
+      this.removeTypingIndicator();
+      
+      if (data.error) {
+        this.addMessage('Sorry, I had trouble understanding that. Please try again.');
+      } else {
+        this.addMessage(data.response || 'I received your message!');
+        
+        // Handle recommendations if provided
+        if (data.recommendations && data.recommendations.picks) {
+          this.displayRecommendations(data.recommendations);
+        }
+      }
+    } catch (error) {
+      this.removeTypingIndicator();
+      this.addMessage('Sorry, there was an error processing your message.');
+      console.error('Chat error:', error);
+    } finally {
+      this.isProcessing = false;
+    }
+  },
+  
+  async handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+      await this.processImageFile(file);
+      event.target.value = ''; // Clear input
+    }
+  },
+  
+  async processImageFile(file) {
+    if (this.isProcessing) return;
+    
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      this.addMessage('Please upload a valid image file.');
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      this.addMessage('Please upload an image smaller than 5MB.');
+      return;
+    }
+    
+    this.isProcessing = true;
+    
+    // Add user message with image
+    this.addMessage('Analyzing your skin photo...', true, file);
+    
+    // Pre-typing delay
+    await new Promise(resolve => setTimeout(resolve, this.calculatePreTypingDelay()));
+    
+    // Add typing indicator
+    this.addTypingIndicator();
+    
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+      
+      const response = await fetch('/api/v1/chat/message', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await response.json();
+      
+      // Calculate typing delay for analysis response
+      const typingDelay = this.calculateTypingDelay(data.response?.length || 200);
+      await new Promise(resolve => setTimeout(resolve, typingDelay));
+      
+      // Remove typing indicator
+      this.removeTypingIndicator();
+      
+      if (data.error) {
+        this.addMessage('🔧 Sorry, there was an error analyzing your photo. Please try again.');
+      } else {
+        this.addMessage(data.response || 'I\'ve analyzed your photo!');
+        
+        // Display analysis results if provided
+        if (data.analysis) {
+          this.displayAnalysisResults(data.analysis);
+        }
+        
+        // Display recommendations if provided
+        if (data.recommendations && data.recommendations.picks) {
+          this.displayRecommendations(data.recommendations);
+        }
+      }
+    } catch (error) {
+      this.removeTypingIndicator();
+      this.addMessage('🔧 Sorry, there was an error analyzing your photo. Please try again.');
+      console.error('Photo analysis error:', error);
+    } finally {
+      this.isProcessing = false;
+    }
+  },
+  
+  displayAnalysisResults(analysis) {
+    if (!analysis.face_detected) return;
+    
+    let analysisText = `**Skin Analysis Results:**\n\n`;
+    
+    if (analysis.skin_type && analysis.skin_type !== 'unknown') {
+      analysisText += `• **Skin Type:** ${analysis.skin_type}\n`;
+    }
+    
+    if (analysis.concerns && analysis.concerns.length > 0) {
+      analysisText += `• **Concerns Detected:** ${analysis.concerns.join(', ')}\n`;
+    }
+    
+    if (analysis.notes) {
+      analysisText += `• **Notes:** ${analysis.notes}\n`;
+    }
+    
+    // Add delay before showing analysis
+    setTimeout(() => {
+      this.addMessage(analysisText);
+    }, 1000);
+  },
+  
+  displayRecommendations(recommendations) {
+    if (!recommendations.picks || Object.keys(recommendations.picks).length === 0) return;
+    
+    let recText = `**Product Recommendations:**\n\n`;
+    
+    Object.entries(recommendations.picks).forEach(([category, products]) => {
+      if (products && products.length > 0) {
+        recText += `**${category.toUpperCase()}:**\n`;
+        products.slice(0, 2).forEach(product => {
+          const link = product.product_url ? `[${product.name}](${product.product_url})` : product.name;
+          recText += `• ${link} by ${product.brand}\n`;
+        });
+        recText += '\n';
+      }
+    });
+    
+    if (recommendations.rationale) {
+      recText += `**Why these products:** ${recommendations.rationale}\n\n`;
+    }
+    
+    recText += `⚠️ Important: This is general skincare information only. For medical concerns, please consult a qualified dermatologist or healthcare provider.`;
+    
+    // Add delay before showing recommendations
+    setTimeout(() => {
+      this.addMessage(recText);
+    }, 2000);
+  },
+  
+  clearChat() {
+    localStorage.removeItem('skincare_chat');
+    this.chatHistory = [];
+    const chatContainer = document.querySelector('.h-96.overflow-y-auto');
+    chatContainer.innerHTML = `
+      <div class="flex justify-start">
+        <div class="max-w-[80%] rounded-2xl px-4 py-3 glass-message border border-border/30 mr-4 backdrop-blur-sm bg-background/20">
+          <p class="text-sm leading-relaxed">👋 Fresh start! What skincare questions can I help you with? 😊</p>
+          <span class="text-xs opacity-70 mt-1 block">${new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          })}</span>
+        </div>
+      </div>
+    `;
+  }
+};
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  SkinCareChat.init();
+});
+
+// Update the welcome message to remove AI reference
+document.addEventListener('DOMContentLoaded', () => {
+  const welcomeMessage = document.querySelector('.text-sm.leading-relaxed');
+  if (welcomeMessage && welcomeMessage.textContent.includes('AI Skin Aesthetics Expert')) {
+    welcomeMessage.innerHTML = "👋 Hey there! I'm so excited to help you with your skincare journey! You can:<br>• Ask me skincare questions<br>• Upload a photo for skin analysis<br>• Drag & drop images directly here<br><br>How can I help you today?";
+  }
+});
+</script>
