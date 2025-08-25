@@ -424,13 +424,13 @@ class ChatService
         - Skin type: #{context[:skin_type]}
         - What you can see: #{concerns_list}
         
-        Give a brief, natural reaction to what you see. Just mention the main things you notice in a casual way.
+        Give a brief, honest reaction based EXACTLY on what you observed. If you see concerns like acne, redness, etc., mention them directly. If the skin looks clear, say so. Be accurate to what's actually in the analysis.
         
-        Then ask a follow-up question about their experience - like how long they've had these concerns, their current routine, or what they've tried before.
+        Then ask a relevant follow-up question about their experience - like how long they've had these specific concerns, their current routine, or what they've tried before.
         
-        Don't recommend any specific products yet. This is just the beginning of getting to know their skin.
+        Don't recommend any specific products yet. Just focus on understanding their situation.
         
-        Keep it conversational and brief.
+        Keep it conversational and brief. Be honest about what you see.
       PROMPT
     else
       prompt = <<~PROMPT

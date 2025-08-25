@@ -52,7 +52,7 @@ class VisionAnalysisClient
               }
             ],
             max_tokens: 400,
-            temperature: 0
+            temperature: 0.1
           }
         )
 
@@ -161,24 +161,32 @@ class VisionAnalysisClient
 
   def system_prompt
     <<~PROMPT
-      Analyze photos for cosmetic product recommendations. Observe visual characteristics and provide neutral descriptions in JSON format only.
+      You are a professional skincare analyst. Carefully examine facial skin photos to identify all visible skin characteristics and concerns. Look closely for acne, redness, dryness, oiliness, texture issues, and other skin conditions. Be thorough and accurate in your observations. Provide detailed analysis in JSON format only.
     PROMPT
   end
 
   def user_prompt
     <<~PROMPT
-      Analyze facial skin for product recommendations. Return JSON:
+      Carefully examine this facial skin photo and identify ALL visible skin concerns. Look for:
+      - Acne (pimples, blackheads, whiteheads, cysts)
+      - Redness (irritation, inflammation, broken capillaries)
+      - Dryness (flaking, rough texture, tightness)
+      - Oiliness (shine, enlarged pores, greasy appearance)
+      - Hyperpigmentation (dark spots, uneven tone, melasma)
+      - Sensitivity (irritation, reactivity signs)
+
+      Be thorough and accurate. Don't miss obvious concerns. Return JSON:
 
       {
         "face_detected": true | false,
         "skin_type": "dry" | "oily" | "combination" | "normal" | "unknown",
         "concerns": ["acne", "redness", "dryness", "oiliness", "hyperpigmentation", "sensitivity"],
         "severity": { "concern_name": "mild" | "moderate" | "noticeable" },
-        "notes": "Brief skin description"
+        "notes": "Detailed description of what you observe"
       }
 
       If no face detected: set face_detected=false, skin_type="unknown", concerns=[], severity={}, notes explaining why.
-      If face detected: analyze skin type, concerns, and severity levels. Return only JSON.
+      If face detected: analyze ALL visible skin characteristics thoroughly. Don't be overly conservative - identify concerns that are clearly visible.
     PROMPT
   end
 
@@ -190,10 +198,12 @@ class VisionAnalysisClient
 
   def fallback_user_prompt
     <<~PROMPT
-      Describe photo in JSON format:
-      {"face_detected": true|false, "skin_type": "dry|oily|combination|normal|unknown", "concerns": [], "severity": {}, "notes": "description"}
+      Examine this photo thoroughly and identify any skin issues. Look for acne, redness, dryness, oiliness, dark spots, or other concerns.
+
+      Return JSON:
+      {"face_detected": true|false, "skin_type": "dry|oily|combination|normal|unknown", "concerns": [], "severity": {}, "notes": "detailed description"}
       
-      If face visible: analyze skin. If no face: set face_detected=false, other fields to defaults. Return JSON only.
+      If face visible: analyze skin thoroughly and identify ALL visible concerns. If no face: set face_detected=false, other fields to defaults. Return JSON only.
     PROMPT
   end
 
