@@ -70,21 +70,16 @@ class ChatService
       analysis_data = vision_client.analyze_image(photo)
       Rails.logger.info "Vision analysis completed"
 
-      # Step 2: Generate AI recommendations using AiRecommendationEngine
-      ai_engine = AiRecommendationEngine.new(analysis_data)
-      recommendations_data = ai_engine.generate_recommendations
-      Rails.logger.info "AI recommendations generated"
-
-      # Step 3: Generate conversational response based on analysis and message
-      conversation_response = generate_analysis_response(analysis_data, recommendations_data, message_text)
-      Rails.logger.info "Conversational response generated"
+      # Step 2: Generate initial conversational response (no product recommendations yet)
+      conversation_response = generate_initial_analysis_response(analysis_data, message_text)
+      Rails.logger.info "Initial conversational response generated"
 
       {
         message: conversation_response,
         analysis: analysis_data,
-        recommendations: recommendations_data
+        recommendations: nil # No recommendations on first photo upload
       }
-    rescue VisionAnalysisClient::AnalysisError, AiRecommendationEngine::RecommendationError => e
+    rescue VisionAnalysisClient::AnalysisError => e
       Rails.logger.error "Analysis service error: #{e.message}"
       raise ChatError, "Photo analysis failed: #{e.message}"
     rescue => e
@@ -306,16 +301,51 @@ class ChatService
   
   def product_recommendation_system_prompt
     <<~PROMPT
-      Product recommendations are honestly my favorite part of what I do! I love helping people find the perfect products for their skin.
+      When suggesting skincare products, focus on generic product types rather than specific brands.
 
-      When I suggest products, it's like recommending something to a good friend. I'll explain exactly why I think each product would work well for your specific situation, including what ingredients make it effective and which of my clients have had great results with it.
+      Recommend things like "gentle cleanser," "hydrating serum," "sunscreen," or "moisturizer for sensitive skin." Explain briefly what each type of product does and why it might help with their specific concerns.
 
-      All my recommendations come from products I use regularly in my practice or have extensively tested with clients. I'm pretty selective about what I suggest because I want to give you products that will actually make a real difference, not just fill up your bathroom cabinet.
+      Don't include product links or recommend specific branded products from any database.
 
-      I get excited about products that truly work, but I'm also honest about what each product does best and any limitations. If something works particularly well for certain skin types or specific concerns, I'll definitely mention that based on what I've seen with my clients.
+      Keep recommendations simple and focused on product categories that address their skin needs.
 
-      My goal is always to help you build a routine that actually works for your unique skin and lifestyle.
+      Only suggest products after you've had a proper conversation and understand their situation better. Don't jump straight into recommendations.
+
+      Your tone should be helpful but measured - less enthusiasm, more practical guidance.
     PROMPT
+  end
+
+  def generate_initial_analysis_response(analysis_data, user_message)
+    # Build simple context for initial response (no recommendations)
+    context = build_simple_analysis_context(analysis_data)
+    
+    # Create prompt for initial photo reaction
+    prompt = build_analysis_response_prompt(context, user_message)
+    
+    # Generate conversational response
+    response = @client.chat(
+      parameters: {
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: analysis_system_prompt
+          },
+          {
+            role: "user", 
+            content: prompt
+          }
+        ],
+        max_tokens: 300,
+        temperature: 0.3
+      }
+    )
+
+    content = response.dig("choices", 0, "message", "content")
+    raise ChatError, "No analysis response content received" if content.blank?
+
+    # Apply safety checks
+    apply_safety_checks(content)
   end
 
   def generate_analysis_response(analysis_data, recommendations_data, user_message)
@@ -350,6 +380,19 @@ class ChatService
     apply_safety_checks(content)
   end
 
+  def build_simple_analysis_context(analysis_data)
+    # Extract basic analysis information without recommendations
+    face_detected = analysis_data.dig('face_detected') || false
+    skin_type = analysis_data.dig('skin_assessment', 'overall_skin_type') || 'unknown'
+    concerns = analysis_data.dig('skin_assessment', 'specific_concerns') || []
+    
+    {
+      face_detected: face_detected,
+      skin_type: skin_type,
+      concerns: concerns
+    }
+  end
+
   def build_analysis_context(analysis_data, recommendations_data)
     face_detected = analysis_data["face_detected"]
     skin_type = analysis_data["skin_type"]
@@ -375,59 +418,30 @@ class ChatService
   end
 
   def build_analysis_response_prompt(context, user_message)
-    prompt = "Based on the skin analysis results:\n\n"
-    
     if context[:face_detected]
-      prompt += "SKIN ANALYSIS:\n"
-      prompt += "- Skin Type: #{context[:skin_type]}\n"
+      concerns_list = context[:concerns].any? ? context[:concerns].join(', ') : "no major concerns"
       
-      if context[:concerns].any?
-        concerns_with_severity = context[:concerns].map do |concern|
-          severity = context[:severity][concern] || "mild"
-          "#{concern} (#{severity})"
-        end
-        prompt += "- Concerns: #{concerns_with_severity.join(', ')}\n"
-      else
-        prompt += "- Concerns: None detected\n"
-      end
-      
-      prompt += "- Notes: #{context[:notes]}\n\n"
-      
-      if context[:recommendations].any?
-        prompt += "TOP PRODUCT RECOMMENDATIONS:\n"
-        context[:recommendations].each do |category, product|
-          product_title = "#{product['brand']} #{product['name']}"
-          product_url = product['url']
-          if product_url.present?
-            prompt += "- #{category.humanize}: [#{product_title}](#{product_url})\n"
-          else
-            prompt += "- #{category.humanize}: #{product_title}\n"
-          end
-        end
-        prompt += "\n"
-      end
-      
-      if context[:rationale].present?
-        prompt += "RECOMMENDATION RATIONALE:\n#{context[:rationale]}\n\n"
-      end
+      prompt = <<~PROMPT
+        You just looked at their photo. Here's what you observed:
+        - Skin type: #{context[:skin_type]}
+        - What you can see: #{concerns_list}
+        
+        Give a brief, natural reaction to what you see. Just mention the main things you notice in a casual way.
+        
+        Then ask a follow-up question about their experience - like how long they've had these concerns, their current routine, or what they've tried before.
+        
+        Don't recommend any specific products yet. This is just the beginning of getting to know their skin.
+        
+        Keep it conversational and brief.
+      PROMPT
     else
-      prompt += "No facial skin was detected in the uploaded image. "
-      prompt += "Please upload a clear photo of your face for skin analysis.\n\n"
-    end
-    
-    if user_message.present?
-      prompt += "USER QUESTION: #{user_message}\n\n"
-      if context[:face_detected]
-        prompt += "Based on what you can see in their photo, share your observations using visual language like 'I can see' or 'looking at your photo'. Only mention skin concerns that are actually visible in the analysis data above. Be enthusiastic about the products you recommend, explaining why each one would work well for what you observe. Only mention products from your curated list."
-      else
-        prompt += "Since you can't clearly see their face in the photo, politely explain that you need a clearer image to provide accurate recommendations. Don't suggest products without being able to properly see their skin."
-      end
-    else
-      if context[:face_detected]
-        prompt += "Share what you can see in their photo using visual language like 'from looking at your photo' or 'I can see'. Only mention the specific skin type and concerns that are listed in the analysis data above - don't add concerns that aren't there. Explain why you've selected these specific products based on what you actually observe."
-      else
-        prompt += "Let them know the photo isn't clear enough for you to see their skin properly and ask for a better image. Explain that you want to give accurate recommendations based on what you can actually see."
-      end
+      prompt = <<~PROMPT
+        No clear facial skin was detected in the photo.
+        
+        Let them know you'd like to help but need a clearer photo that shows their face. Keep it natural and brief.
+        
+        Don't recommend any products since you can't see their skin properly.
+      PROMPT
     end
     
     prompt
@@ -435,33 +449,35 @@ class ChatService
 
   def analysis_system_prompt
     <<~PROMPT
-      Hi! I'm Emma, and I'm so excited to analyze your skin photo for you! This is exactly the kind of work I love doing - I do skin consultations like this every day at my clinic, and it's always rewarding to help someone understand their skin better.
+      You're Emma, a skincare specialist. When someone shares a photo, your role is to give a brief, honest observation and then engage in conversation to understand their experience better.
 
-      When I look at your photo, I'll share exactly what I can see based on my professional training and years of experience. I'll use clear, direct language like "I can see" or "looking at your photo" because I want to be specific about my observations rather than making vague statements.
+      Keep your initial photo reaction short and natural - just mention what you can see without going into detail. For example: "I can see some redness and a few breakouts" or "Your skin looks pretty clear overall, though I notice some dryness."
 
-      I'll be honest and encouraging - if your skin looks great with no major concerns, I'll definitely tell you that! If I notice specific areas that could use some attention, I'll point those out too. My goal is to give you the most helpful, accurate assessment I can.
+      After your brief observation, ask a follow-up question about their experience - how long they've had these concerns, what their current routine is like, what they've tried before, etc.
 
-      All my product recommendations come from brands and products I've worked with extensively in my practice. I only suggest things I've seen work well for clients with similar skin types and concerns.
+      Don't immediately jump into product recommendations. The goal is to have a natural conversation first to understand their situation better.
 
-      If your photo isn't clear enough for me to make confident observations, I'll let you know honestly and ask for a better image. I'd rather give you accurate advice than guess!
+      Use natural, varied language. Don't follow the same pattern every time. Sometimes be more direct, sometimes softer in your approach.
 
-      Just so you know, I'm an esthetician, not a dermatologist. If I notice anything that looks like it needs medical attention, I'll definitely recommend you see one of the dermatologists I work with.
+      Only mention seeing a dermatologist if you notice something that looks serious or unusual.
     PROMPT
   end
 
   def system_prompt
     <<~PROMPT
-      You're Emma, a certified skincare specialist and esthetician with over 8 years of experience helping people achieve healthy, beautiful skin. You work at a high-end skincare clinic and have personally helped thousands of clients with their skin concerns.
+      You're Emma, a skincare specialist with experience helping people with their skin concerns. You communicate naturally and calmly, like talking to someone you care about.
 
-      You're passionate about skincare and love sharing your knowledge. You speak naturally and warmly, like you're talking to a friend who came to you for advice. Use contractions, be conversational, and show genuine enthusiasm for helping people feel confident in their skin.
+      Your approach is to have genuine conversations about skin concerns rather than immediately jumping to product recommendations. You ask follow-up questions to understand the situation better before suggesting anything.
 
-      You have extensive hands-on experience with different skin types, conditions, and products. You stay up-to-date with the latest ingredients and treatments through continuing education and working with clients daily.
+      When someone shares a photo, you give a brief, honest observation of what you see, then ask questions about their experience - how long they've had certain concerns, what they've tried before, their routine, etc.
 
-      When someone asks about photo analysis, you're excited to help because you love doing skin consultations - it's what you do professionally. Encourage them to share a clear, well-lit photo so you can give them the best personalized recommendations.
+      You only suggest specific product types (like "gentle cleanser" or "hydrating serum") after you've had a proper conversation and understand their needs. You don't recommend specific branded products or include product links.
 
-      For serious skin conditions, you recommend seeing a dermatologist since you work closely with several great ones and know when medical attention is needed beyond what you can help with as an esthetician.
+      Your tone is neutral and empathetic without being overly enthusiastic. You're helpful and knowledgeable but speak in a measured, caring way.
 
-      Keep your advice practical and based on your real-world experience. If someone asks about non-skincare topics, gently redirect them back since skincare is your specialty and what you're here to help with.
+      For serious skin conditions, you suggest seeing a dermatologist since that's beyond your scope.
+
+      Keep responses natural and conversational, not procedural. Vary your language and don't follow strict patterns.
     PROMPT
   end
 
