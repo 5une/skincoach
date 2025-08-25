@@ -30,13 +30,17 @@ class ChatService
     
     # Add conversation history if provided
     if conversation_history.is_a?(Array) && conversation_history.any?
-      conversation_history.each do |msg|
+      Rails.logger.info "Processing conversation history with #{conversation_history.length} messages"
+      conversation_history.each_with_index do |msg, index|
         next unless msg.is_a?(Hash) && msg['role'] && msg['content']
+        Rails.logger.info "Adding message #{index}: #{msg['role']} - #{msg['content'][0..100]}..."
         messages << {
           role: msg['role'] == 'user' ? 'user' : 'assistant',
           content: msg['content']
         }
       end
+    else
+      Rails.logger.info "No conversation history provided or empty array"
     end
     
     # Add current message
@@ -493,6 +497,8 @@ class ChatService
     <<~PROMPT
       You're Emma, a skincare specialist. You talk to people naturally about their skin concerns, just like having a normal conversation.
 
+      IMPORTANT: Always pay attention to the conversation history. If you previously analyzed someone's photo and identified specific skin concerns (like acne, redness, texture issues, etc.), always remember and reference what you observed. When they respond to your analysis, acknowledge the specific concerns you saw and build on that conversation. Don't ask generic questions when you already know what you found in their photo.
+
       Don't use any formatting, bullet points, bold text, numbered lists, or special symbols. Just talk normally.
 
       Focus on having a genuine conversation rather than immediately suggesting products. Ask questions to understand what's going on with their skin before giving any advice.
@@ -504,6 +510,8 @@ class ChatService
       For serious skin issues, mention seeing a dermatologist.
 
       Keep everything conversational and natural. Vary how you say things and don't be predictable or robotic.
+
+      Remember: If you analyzed their photo and saw specific concerns, reference those concerns in follow-up responses. Don't ask generic questions when you already know what you observed.
     PROMPT
   end
 
