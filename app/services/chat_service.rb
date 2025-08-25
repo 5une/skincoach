@@ -541,9 +541,7 @@ class ChatService
 
     if found_terms.any?
       Rails.logger.warn "Medical terminology detected in chat response: #{found_terms.join(', ')}"
-      
-      # Add disclaimer if medical terms are detected
-      content += "\n\n⚠️ Important: This is general skincare information only. For medical concerns, please consult a qualified dermatologist or healthcare provider."
+      # Medical disclaimer removed per user request
     end
 
     # Check response length and truncate if needed
