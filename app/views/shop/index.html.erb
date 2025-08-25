@@ -22,14 +22,14 @@
           </svg>
         </div>
       </div>
-      <h1 class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">AI Skin Aesthetics Expert</h1>
+      <h1 class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">Skin Aesthetics Expert</h1>
       <p class="text-muted-foreground">Your personal skincare consultant for healthy, radiant skin</p>
     </div>
     <div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 glass-card-enhanced border-0 shadow-2xl backdrop-blur-xl bg-background/30">
       <div class="h-96 overflow-y-auto p-6 space-y-4">
         <div class="flex justify-start">
           <div class="max-w-[80%] rounded-2xl px-4 py-3 glass-message border border-border/30 mr-4 backdrop-blur-sm bg-background/20">
-            <p class="text-sm leading-relaxed">Hello! I'm your AI Skin Aesthetics Expert. I can help you with skincare routines, product recommendations, skin analysis, and personalized beauty advice. What skin concerns would you like to address today?</p>
+            <p class="text-sm leading-relaxed">Hi there! I'm Emma, your personal skincare specialist. I'm here to help you with skincare routines, product recommendations, skin analysis, and personalized beauty advice. What skin concerns would you like to address today?</p>
             <span class="text-xs opacity-70 mt-1 block">05:32 PM</span>
           </div>
         </div>
@@ -528,7 +528,7 @@ const SkinCareChat = {
     chatContainer.innerHTML = `
       <div class="flex justify-start">
         <div class="max-w-[80%] rounded-2xl px-4 py-3 glass-message border border-border/30 mr-4 backdrop-blur-sm bg-background/20">
-          <p class="text-sm leading-relaxed">👋 Fresh start! What skincare questions can I help you with? 😊</p>
+          <p class="text-sm leading-relaxed">👋 Fresh start! I'm Emma, your skincare specialist. What can I help you with today? 😊</p>
           <span class="text-xs opacity-70 mt-1 block">${new Date().toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
@@ -545,11 +545,11 @@ document.addEventListener('DOMContentLoaded', () => {
   SkinCareChat.init();
 });
 
-// Update the welcome message to remove AI reference
+// Update the welcome message to be more personal
 document.addEventListener('DOMContentLoaded', () => {
   const welcomeMessage = document.querySelector('.text-sm.leading-relaxed');
-  if (welcomeMessage && welcomeMessage.textContent.includes('AI Skin Aesthetics Expert')) {
-    welcomeMessage.innerHTML = "👋 Hey there! I'm so excited to help you with your skincare journey! You can:<br>• Ask me skincare questions<br>• Upload a photo for skin analysis<br>• Drag & drop images directly here<br><br>How can I help you today?";
+  if (welcomeMessage && welcomeMessage.textContent.includes('Emma')) {
+    welcomeMessage.innerHTML = "👋 Hey there! I'm Emma, and I'm so excited to help you with your skincare journey! I'm a certified esthetician with over 8 years of experience. You can:<br>• Ask me skincare questions<br>• Upload a photo for professional skin analysis<br>• Drag & drop images directly here<br><br>What skin goals are you working on today?";
   }
 });
 </script>
