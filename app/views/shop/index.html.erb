@@ -240,11 +240,7 @@ const SkinCareChat = {
     }
     
     // Process message content
-    if (!isUser) {
-      content += `<div class="text-sm leading-relaxed">${this.processMarkdown(text)}</div>`;
-    } else {
-      content += `<p class="text-sm leading-relaxed">${text}</p>`;
-    }
+    content += `<p class="text-sm leading-relaxed">${text}</p>`;
     
     // Add timestamp
     const time = new Date().toLocaleTimeString('en-US', {
@@ -282,27 +278,7 @@ const SkinCareChat = {
     }
   },
   
-  processMarkdown(text) {
-    // Convert **bold** to <strong>
-    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    // Convert *italic* to <em>
-    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    
-    // Convert [Product Name](url) to clickable links
-    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #3b82f6; text-decoration: underline;">$1</a>');
-    
-    // Style medical disclaimers
-    text = text.replace(
-      /(⚠️ Important:.*?)(?=\n\n|\n$|$)/g,
-      '<div style="font-size: 0.75rem; font-style: italic; color: #6b7280; background: #f9fafb; padding: 8px; border-left: 3px solid #fbbf24; border-radius: 4px; margin-top: 8px;">$1</div>'
-    );
-    
-    // Convert line breaks to <br>
-    text = text.replace(/\n/g, '<br>');
-    
-    return text;
-  },
+
   
   addTypingIndicator() {
     const chatContainer = document.querySelector('.h-96.overflow-y-auto');
@@ -452,15 +428,7 @@ const SkinCareChat = {
       } else {
         this.addMessage(data.response || 'I\'ve analyzed your photo!');
         
-        // Display analysis results if provided
-        if (data.analysis) {
-          this.displayAnalysisResults(data.analysis);
-        }
-        
-        // Display recommendations if provided
-        if (data.recommendations && data.recommendations.picks) {
-          this.displayRecommendations(data.recommendations);
-        }
+        // Analysis and recommendations are now included in the main response
       }
     } catch (error) {
       this.removeTypingIndicator();
@@ -471,56 +439,7 @@ const SkinCareChat = {
     }
   },
   
-  displayAnalysisResults(analysis) {
-    if (!analysis.face_detected) return;
-    
-    let analysisText = `**Skin Analysis Results:**\n\n`;
-    
-    if (analysis.skin_type && analysis.skin_type !== 'unknown') {
-      analysisText += `• **Skin Type:** ${analysis.skin_type}\n`;
-    }
-    
-    if (analysis.concerns && analysis.concerns.length > 0) {
-      analysisText += `• **Concerns Detected:** ${analysis.concerns.join(', ')}\n`;
-    }
-    
-    if (analysis.notes) {
-      analysisText += `• **Notes:** ${analysis.notes}\n`;
-    }
-    
-    // Add delay before showing analysis
-    setTimeout(() => {
-      this.addMessage(analysisText);
-    }, 1000);
-  },
-  
-  displayRecommendations(recommendations) {
-    if (!recommendations.picks || Object.keys(recommendations.picks).length === 0) return;
-    
-    let recText = `**Product Recommendations:**\n\n`;
-    
-    Object.entries(recommendations.picks).forEach(([category, products]) => {
-      if (products && products.length > 0) {
-        recText += `**${category.toUpperCase()}:**\n`;
-        products.slice(0, 2).forEach(product => {
-          const link = product.product_url ? `[${product.name}](${product.product_url})` : product.name;
-          recText += `• ${link} by ${product.brand}\n`;
-        });
-        recText += '\n';
-      }
-    });
-    
-    if (recommendations.rationale) {
-      recText += `**Why these products:** ${recommendations.rationale}\n\n`;
-    }
-    
-    recText += `⚠️ Important: This is general skincare information only. For medical concerns, please consult a qualified dermatologist or healthcare provider.`;
-    
-    // Add delay before showing recommendations
-    setTimeout(() => {
-      this.addMessage(recText);
-    }, 2000);
-  },
+
   
   clearChat() {
     localStorage.removeItem('skincare_chat');
