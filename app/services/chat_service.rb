@@ -32,7 +32,8 @@ class ChatService
     if conversation_history.is_a?(Array) && conversation_history.any?
       Rails.logger.info "Processing conversation history with #{conversation_history.length} messages"
       conversation_history.each_with_index do |msg, index|
-        next unless msg.is_a?(Hash) && msg['role'] && msg['content']
+        # Handle both Hash and ActionController::Parameters
+        next unless (msg.is_a?(Hash) || msg.is_a?(ActionController::Parameters)) && msg['role'] && msg['content']
         Rails.logger.info "Adding message #{index}: #{msg['role']} - #{msg['content'][0..100]}..."
         messages << {
           role: msg['role'] == 'user' ? 'user' : 'assistant',
@@ -353,7 +354,8 @@ class ChatService
     # Add conversation history if provided
     if conversation_history.is_a?(Array) && conversation_history.any?
       conversation_history.each do |msg|
-        next unless msg.is_a?(Hash) && msg['role'] && msg['content']
+        # Handle both Hash and ActionController::Parameters
+        next unless (msg.is_a?(Hash) || msg.is_a?(ActionController::Parameters)) && msg['role'] && msg['content']
         messages << {
           role: msg['role'] == 'user' ? 'user' : 'assistant',
           content: msg['content']
