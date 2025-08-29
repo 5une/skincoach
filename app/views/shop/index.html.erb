@@ -337,10 +337,12 @@ const SkinCareChat = {
     
     try {
       // Build conversation history for context
+      console.log('Building conversation history from', this.chatHistory.length, 'messages');
       const conversationHistory = this.chatHistory.map(msg => ({
         role: msg.type === 'user' ? 'user' : 'assistant',
         content: msg.text
       }));
+      console.log('Sending conversation history:', conversationHistory.length, 'messages');
       
       const response = await fetch('/api/v1/chat/message', {
         method: 'POST',
@@ -458,8 +460,10 @@ const SkinCareChat = {
 
   
   clearChat() {
+    console.log('Clearing chat - before:', this.chatHistory.length, 'messages');
     localStorage.removeItem('skincare_chat');
     this.chatHistory = [];
+    console.log('Clearing chat - after:', this.chatHistory.length, 'messages');
     const chatContainer = document.querySelector('.h-96.overflow-y-auto');
     chatContainer.innerHTML = `
       <div class="flex justify-start">
