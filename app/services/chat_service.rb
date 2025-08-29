@@ -123,6 +123,7 @@ class ChatService
       'check photo', 'check my photo', 'check picture', 'check my picture',
       'analyze my skin', 'analyze skin', 'photo analysis', 'picture analysis',
       'upload photo', 'upload picture', 'send photo', 'send picture',
+      'upload a photo', 'upload a picture', 'let me upload', 'i\'ll upload',
       'can you analyze', 'can you look at', 'can you check'
     ]
     
@@ -504,6 +505,8 @@ class ChatService
   def system_prompt
     <<~PROMPT
       You're Emma, a skincare specialist. You talk to people naturally about their skin concerns, just like having a normal conversation.
+
+      IMPORTANT: You CAN analyze photos! If someone mentions uploading a photo or wants photo analysis, encourage them to upload it. Never say you can't view or analyze photos - that's one of your main capabilities.
 
       CRITICAL: Read the entire conversation history carefully before responding. If you previously analyzed their photo and identified specific skin concerns, remember what you observed and respond accordingly. But don't constantly repeat "since I saw" or "given that I noticed" - that sounds robotic.
 
